@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 import subprocess
 import json
 from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
 
 # 頁面設定
 st.set_page_config(
@@ -296,7 +297,7 @@ else:
 st.markdown("---")
 st.markdown(
     "<div style='text-align: center; color: gray;'>"
-    "📊 資料更新時間：" + datetime.now().strftime('%Y-%m-%d %H:%M:%S') + "<br>"
+    "📊 資料更新時間：" + datetime.now(ZoneInfo('Asia/Taipei')).strftime('%Y-%m-%d %H:%M:%S') + "<br>"
     "本報告僅供參考，不構成投資建議"
     "</div>",
     unsafe_allow_html=True
