@@ -18,13 +18,34 @@ st.set_page_config(
     layout="wide"
 )
 
-# 地點設定
+# 地點設定（從北到南排序：台灣 → 日本）
 LOCATIONS = {
+    # === 台灣 ===
     '新竹寶山': {'lat': 24.75, 'lon': 121.05},
+    '苗栗': {'lat': 24.560, 'lon': 120.821},
     '台中南屯': {'lat': 24.125, 'lon': 120.625},
-    '台北': {'lat': 25.033, 'lon': 121.565},
-    '高雄': {'lat': 22.627, 'lon': 120.301},
+    '沙鹿': {'lat': 24.257, 'lon': 120.566},
+    '龍井': {'lat': 24.192, 'lon': 120.545},
+    '彰化': {'lat': 24.081, 'lon': 120.562},
+    '埔里': {'lat': 23.968, 'lon': 120.967},
+    '日月潭': {'lat': 23.881, 'lon': 120.908},
+    # === 日本 ===
+    '東京': {'lat': 35.676, 'lon': 139.650},
+    '名古屋': {'lat': 35.181, 'lon': 136.906},
+    '大阪': {'lat': 34.693, 'lon': 135.502},
+    '京都': {'lat': 35.011, 'lon': 135.768},
+    '沖繩_系滿': {'lat': 26.255, 'lon': 127.702},
+    '沖繩_豐見': {'lat': 26.168, 'lon': 127.683},
+    '沖繩_那霸': {'lat': 26.212, 'lon': 127.681},
+    '沖繩_恩納': {'lat': 26.591, 'lon': 127.862},
+    '沖繩_名護': {'lat': 26.591, 'lon': 127.978},
 }
+
+# 自動化通報地點（不動！）
+AUTO_NOTIFY_LOCATIONS = ['新竹寶山', '台中南屯']
+
+# 頁面預設地點
+DEFAULT_LOCATION = '台中南屯'
 
 def get_weather_data(lat, lon):
     """從 Open-Meteo API 取得天氣資料"""
@@ -71,10 +92,11 @@ def get_wind_level(speed):
 st.sidebar.title("🌤️ 少爺的天氣儀表板")
 st.sidebar.markdown("---")
 
-# 選擇地點
+# 選擇地點（預設：台中南屯）
 selected_location = st.sidebar.selectbox(
     "選擇地點",
-    list(LOCATIONS.keys())
+    list(LOCATIONS.keys()),
+    index=list(LOCATIONS.keys()).index(DEFAULT_LOCATION)
 )
 
 # 選擇天數
