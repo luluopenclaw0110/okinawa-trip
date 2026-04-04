@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏝️ 沖繩之旅 2026 | 盧家×方家</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', Arial, sans-serif; background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .header { text-align: center; padding: 60px 20px; color: white; position: relative; overflow: hidden; }
+        .header::before { content: '🌺'; font-size: 200px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.1; }
+        .header h1 { font-size: 3.5em; margin-bottom: 15px; text-shadow: 0 0 50px rgba(255,255,255,0.3); animation: glow 3s ease-in-out infinite; }
+        @keyframes glow { 0%, 100% { text-shadow: 0 0 30px rgba(255,255,255,0.3); } 50% { text-shadow: 0 0 60px rgba(255,255,255,0.5); } }
+        .header .subtitle { font-size: 1.4em; opacity: 0.9; margin-bottom: 30px; }
+        .header .badges { display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .header .badge { background: rgba(255,255,255,0.2); padding: 10px 22px; border-radius: 30px; backdrop-filter: blur(10px); font-size: 1em; }
+
+        .tab-nav { display: flex; justify-content: center; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .tab-btn { background: rgba(255,255,255,0.15); border: 2px solid rgba(255,255,255,0.3); color: white; padding: 12px 28px; border-radius: 50px; cursor: pointer; font-size: 1.05em; font-weight: bold; transition: all 0.3s ease; backdrop-filter: blur(8px); }
+        .tab-btn:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+        .tab-btn.active { background: rgba(255,255,255,0.95); color: #1a1a2e; border-color: rgba(255,255,255,0.95); box-shadow: 0 0 25px rgba(255,255,255,0.3); }
+
+        .gallery-section { display: none; width: 100%; }
+        .gallery-section.active { display: block; width: 100%; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 40px; width: 100%; }
+
+        .place-card { background: rgba(255,255,255,0.97); border-radius: 22px; overflow: hidden; cursor: pointer; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative; width: 100%; min-height: 200px; display: block; }
+        .place-card:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 20px 60px rgba(0,0,0,0.45); }
+        .place-card:hover .card-img img { transform: scale(1.08); }
+        .card-img { height: 200px; overflow: hidden; position: relative; }
+        .card-img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+        .card-badge { position: absolute; top: 12px; left: 12px; background: rgba(0,0,0,0.65); color: white; padding: 5px 12px; border-radius: 20px; font-size: 0.82em; font-weight: bold; backdrop-filter: blur(5px); }
+        .card-stars { position: absolute; bottom: 10px; right: 12px; background: rgba(0,0,0,0.6); color: #FFD700; padding: 4px 10px; border-radius: 15px; font-size: 0.85em; backdrop-filter: blur(5px); letter-spacing: 1px; }
+        .card-body { padding: 18px 20px 20px; }
+        .card-title { font-size: 1.15em; font-weight: bold; color: #222; margin-bottom: 8px; line-height: 1.4; }
+        .card-summary { font-size: 0.88em; color: #666; line-height: 1.55; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 12px; }
+        .card-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+        .card-tag { background: #eef0ff; color: #4a56d9; padding: 3px 10px; border-radius: 12px; font-size: 0.78em; font-weight: 600; }
+        .card-tag.rt { background: #fff3e0; color: #e65100; }
+        .card-expand-hint { display: flex; align-items: center; gap: 5px; margin-top: 12px; font-size: 0.82em; color: #4a56d9; font-weight: 600; }
+        .place-card:hover .card-expand-hint { gap: 8px; }
+
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,10,30,0.85); backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; visibility: hidden; transition: all 0.35s ease; }
+        .modal-overlay.open { opacity: 1; visibility: visible; }
+        .modal { background: white; border-radius: 24px; max-width: 680px; width: 100%; max-height: 90vh; overflow-y: auto; transform: scale(0.85) translateY(30px); transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; }
+        .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+        .modal-img { width: 100%; height: 300px; object-fit: cover; display: block; }
+        .modal-close { position: absolute; top: 15px; right: 18px; background: rgba(0,0,0,0.5); color: white; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.2em; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s; }
+        .modal-close:hover { background: rgba(0,0,0,0.8); }
+        .modal-stars-overlay { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.6); color: #FFD700; padding: 6px 14px; border-radius: 20px; font-size: 1em; backdrop-filter: blur(5px); letter-spacing: 2px; }
+        .modal-body { padding: 25px 28px 30px; }
+        .modal-cat { display: inline-block; background: #4a56d9; color: white; padding: 4px 14px; border-radius: 20px; font-size: 0.82em; font-weight: bold; margin-bottom: 10px; }
+        .modal-cat.rest { background: #e65100; }
+        .modal-title { font-size: 1.5em; font-weight: bold; color: #222; margin-bottom: 10px; line-height: 1.3; }
+        .modal-stars { color: #FFD700; font-size: 1.15em; letter-spacing: 2px; margin-bottom: 18px; }
+        .modal-sec { margin-bottom: 18px; padding-bottom: 18px; border-bottom: 1px solid #f0f0f0; }
+        .modal-sec:last-child { border-bottom: none; margin-bottom: 0; }
+        .modal-sec-title { font-size: 0.75em; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+        .modal-sec-content { font-size: 1em; color: #333; line-height: 1.65; }
+        .modal-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .modal-info-box { background: #f8f9fa; border-radius: 12px; padding: 12px 14px; }
+        .modal-info-box .label { font-size: 0.78em; color: #888; margin-bottom: 3px; }
+        .modal-info-box .value { font-size: 0.95em; color: #333; font-weight: 600; }
+        .modal-reason { background: linear-gradient(135deg, #fff9e6, #fff3cd); border-left: 4px solid #ffd54f; border-radius: 0 12px 12px 0; padding: 14px 16px; font-size: 1em; color: #333; line-height: 1.65; }
+        .modal-caution { background: #fff3f3; border-left: 4px solid #ff6b6b; border-radius: 0 12px 12px 0; padding: 12px 16px; font-size: 0.95em; color: #c0392b; line-height: 1.6; }
+        .modal::-webkit-scrollbar { width: 6px; }
+        .modal::-webkit-scrollbar-track { background: #f1f1f1; }
+        .modal::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+        .alert-box { background: linear-gradient(135deg, #ff6b6b, #ee5a24); color: white; padding: 15px 25px; border-radius: 15px; margin-bottom: 25px; font-size: 1em; display: flex; align-items: center; gap: 12px; }
+        .alert-box .icon { font-size: 2em; }
+        .day-card { background: linear-gradient(145deg, rgba(255,255,255,0.97), rgba(255,255,255,0.92)); border-radius: 30px; margin-bottom: 30px; overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,0.4); transform: translateY(0); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .day-card:hover { transform: translateY(-5px); box-shadow: 0 35px 100px rgba(0,0,0,0.5); }
+        .day-header { padding: 25px 35px; color: white; display: flex; justify-content: space-between; align-items: center; position: relative; overflow: hidden; }
+        .day-header h2 { font-size: 1.8em; position: relative; z-index: 1; }
+        .day-header .date { font-size: 1.1em; opacity: 0.9; position: relative; z-index: 1; }
+        .d1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .d2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .d3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .d4 { background: linear-gradient(135deg, #43e97b, #38ef7d); }
+        .d5 { background: linear-gradient(135deg, #fa709a, #fee140); color: #333; }
+        .d6 { background: linear-gradient(135deg, #ff9a9e, #fecfef); color: #333; }
+        .d7 { background: linear-gradient(135deg, #ffecd2, #fcb69f); color: #333; }
+        .day-content { padding: 30px 35px; }
+        .flight-info { background: linear-gradient(135deg, #11998e, #38ef7d); color: white; padding: 18px 25px; border-radius: 18px; display: flex; align-items: center; gap: 25px; margin-bottom: 20px; flex-wrap: wrap; }
+        .flight-icon { font-size: 3.5em; }
+        .flight-details .flight-name { font-size: 1.2em; font-weight: bold; margin-bottom: 4px; }
+        .flight-details .flight-route { font-size: 1.6em; font-weight: bold; }
+        .flight-details .flight-time { opacity: 0.9; margin-top: 4px; }
+        .activities { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 15px; }
+        .activity { background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 15px 20px; border-radius: 14px; display: flex; align-items: flex-start; gap: 12px; border-left: 5px solid #667eea; transition: all 0.3s; }
+        .activity:hover { transform: translateX(8px); border-left-color: #f5576c; }
+        .activity-emoji { font-size: 2em; flex-shrink: 0; }
+        .activity-content .activity-title { font-weight: bold; color: #333; font-size: 1.1em; margin-bottom: 4px; }
+        .activity-content .activity-desc { color: #666; line-height: 1.5; font-size: 0.92em; }
+        .meals { background: linear-gradient(135deg, #fff9e6, #fff3cd); border-radius: 14px; padding: 15px 20px; margin-top: 18px; border: 2px solid #ffd54f; }
+        .meals-title { font-weight: bold; color: #e65100; margin-bottom: 10px; font-size: 1.05em; display: flex; align-items: center; gap: 8px; }
+        .meal-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; font-size: 0.95em; color: #333; }
+        .meal-row:last-child { margin-bottom: 0; }
+        .meal-icon { font-size: 1.4em; }
+        .meal-label { font-weight: bold; color: #555; min-width: 45px; }
+        .meal-restaurant { color: #d84315; font-weight: 600; }
+        .meal-note { color: #888; font-size: 0.88em; margin-left: 4px; }
+        .hotel-info { background: linear-gradient(135deg, #ff9a9e, #fecfef); color: white; padding: 18px 25px; border-radius: 15px; margin-top: 18px; display: flex; align-items: center; gap: 18px; }
+        .hotel-emoji { font-size: 2.5em; }
+        .hotel-content .hotel-name { font-weight: bold; font-size: 1.15em; }
+        .hotel-content .hotel-nights { opacity: 0.9; margin-top: 3px; font-size: 0.95em; }
+        .zone-tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold; margin-left: 8px; vertical-align: middle; }
+        .zone-naha { background: #e1bee7; color: #4a148c; }
+        .zone-north { background: #b2ebf2; color: #006064; }
+        .zone-central { background: #c8e6c9; color: #1b5e20; }
+        .route-flow { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 20px 30px; border-radius: 18px; margin-bottom: 25px; }
+        .route-flow h3 { margin-bottom: 12px; font-size: 1.1em; opacity: 0.9; }
+        .route-flow .route-line { display: flex; align-items: center; gap: 8px; font-size: 0.95em; flex-wrap: wrap; }
+        .route-flow .route-stop { background: rgba(255,255,255,0.15); padding: 5px 12px; border-radius: 20px; }
+        .route-flow .arrow { opacity: 0.6; font-size: 1.2em; }
+        .footer { text-align: center; padding: 50px 20px; color: white; }
+        .footer h2 { font-size: 2.2em; margin-bottom: 15px; }
+        .footer p { opacity: 0.8; font-size: 1.1em; }
+        .footer .hearts { font-size: 2.8em; margin-top: 18px; animation: heartbeat 1.5s ease-in-out infinite; }
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @media (max-width: 768px) {
+            .header h1 { font-size: 2.2em; }
+            .header .badge { font-size: 0.85em; padding: 8px 15px; }
+            .day-header { flex-direction: column; text-align: center; gap: 8px; }
+            .day-content { padding: 20px 18px; }
+            .flight-info { flex-direction: column; text-align: center; }
+            .meals { padding: 12px 15px; }
+            .gallery-grid { grid-template-columns: 1fr; }
+            .modal-info-grid { grid-template-columns: 1fr; }
+            .tab-btn { padding: 10px 20px; font-size: 0.95em; }
+            .modal-img { height: 220px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏝️ 沖繩之旅 2026</h1>
+            <p class="subtitle">2026年7月19日 - 7月25日 | 7天6夜</p>
+            <div class="badges">
+                <span class="badge">👨‍👩‍👧‍👦 盧家四口</span>
+                <span class="badge">👨‍👩‍👦 方家三口</span>
+                <span class="badge">✈️ 台中↔沖繩</span>
+                <span class="badge">🚕 Day1-2：那霸市區</span>
+                <span class="badge">🏨 Day3-7：BEB5 北部</span>
+            </div>
+        </div>
+
+        <div class="tab-nav">
+            <button class="tab-btn active" id="tab-spots" onclick="showTab('spots')">🌟 景點推薦</button>
+            <button class="tab-btn" id="tab-restaurants" onclick="showTab('restaurants')">🍖 餐廳推薦</button>
+            <button class="tab-btn" id="tab-itinerary" onclick="showTab('itinerary')">📅 行程攻略</button>
+        </div>
+
+        <div class="gallery-section active" id="spots">
+            <div class="gallery-grid" id="spots-grid"><div class="place-card" onclick="openModal('spot',0)"><div class="card-img"><img src="images/spot_01_churaumi.jpg" alt="美ら海水族館" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐⭐ (4.5)</span></div><div class="card-body"><div class="card-title">美ら海水族館（美麗海水族館）</div><div class="card-summary">沖繩美ら海水族館是大家初次來沖繩必訪的景點，館內有7,500立方公尺的「黑潮之海」水槽，是世界最大的水槽之一。</div><div class="card-tags"><span class="card-tag">📍 水族館</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',1)"><div class="card-img"><img src="images/spot_02_dmm_kariyushi.jpg" alt="DMM Kariyushi" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.3)</span></div><div class="card-body"><div class="card-title">DMM Kariyushi水族館</div><div class="card-summary">DMM Kariyushi水族館是2020年新開幕的設施，位於豐崎海灘旁，以「生物體驗」為概念，讓遊客能與海洋生物近距離互動。</div><div class="card-tags"><span class="card-tag">📍 水族館</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',2)"><div class="card-img"><img src="images/spot_03_kourijima.jpg" alt="古宇利島" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐⭐ (4.4)</span></div><div class="card-body"><div class="card-title">古宇利島</div><div class="card-summary">古宇利島是琉球神話起源的「神之島」，更是情侶聖地「戀之島」。島上有著多處未經人為破壞的美麗海灘。</div><div class="card-tags"><span class="card-tag">📍 島嶼</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',3)"><div class="card-img"><img src="images/spot_04_manzamo.jpg" alt="萬座毛" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.3)</span></div><div class="card-body"><div class="card-title">萬座毛</div><div class="card-summary">萬座毛位在沖繩海岸國定公園內，名字原意為「可供萬人齊坐的草原」，最大特色就是象鼻岩、遼闘草原及無敵海景。</div><div class="card-tags"><span class="card-tag">📍 自然景觀</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',4)"><div class="card-img"><img src="images/spot_05_naminomiyagumi.jpg" alt="波上宮" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.2)</span></div><div class="card-body"><div class="card-title">波上宮</div><div class="card-summary">波上宮是沖繩最上位的神社，位於那霸市區懸崖上，供奉著讓人避免颱風、航海平安的神明。</div><div class="card-tags"><span class="card-tag">📍 神社</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',5)"><div class="card-img"><img src="images/spot_06_shurijo.jpg" alt="首里城" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐⭐ (4.4)</span></div><div class="card-body"><div class="card-title">首里城</div><div class="card-summary">首里城是琉球王國時期的城堡，於2000年被列為世界文化遺產。2019年遭受大火重創後，園區大部分區域已開放參觀，目前主殿正在重建中，預計2026年完成。</div><div class="card-tags"><span class="card-tag">📍 世界遺產</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',6)"><div class="card-img"><img src="images/spot_07_teamlab.jpg" alt="teamLab" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.2)</span></div><div class="card-body"><div class="card-title">teamLab Future Park 沖繩</div><div class="card-summary">teamLab 學習！未來的遊樂園沖繩於2023年12月15日正式開幕，常設展位於T Galleria by DFS 沖繩免稅店3樓。</div><div class="card-tags"><span class="card-tag">📍 數位藝術</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',7)"><div class="card-img"><img src="images/spot_08.jpg" alt="寶可夢中心" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.0)</span></div><div class="card-body"><div class="card-title">寶可夢中心 沖繩</div><div class="card-summary">Pokémon Center Okinawa 位於DFS花園水道附近，店內有沖繩限定的比雕等商品。</div><div class="card-tags"><span class="card-tag">📍 購物</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',8)"><div class="card-img"><img src="images/spot_09.jpg" alt="沖繩兒童王國" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐⭐ (4.5)</span></div><div class="card-body"><div class="card-title">沖繩兒童王國</div><div class="card-summary">Okinawa Zoo & Museum是結合動物園和博物館的主題樂園，位於沖繩縣北部。⭐芃芃最愛！</div><div class="card-tags"><span class="card-tag">📍 親子</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',9)"><div class="card-img"><img src="images/spot_10_senagashima.jpg" alt="瀨長島" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.3)</span></div><div class="card-body"><div class="card-title">瀨長島</div><div class="card-summary">純白色的地中海風格建築群依山而建，讓人有置身小希臘的錯覺，是近年社群媒體上最熱門的打卡聖地。</div><div class="card-tags"><span class="card-tag">📍 網美打卡</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',10)"><div class="card-img"><img src="images/spot_11.jpg" alt="青之洞窟" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.4)</span></div><div class="card-body"><div class="card-title">青之洞窟</div><div class="card-summary">沖繩最著名的洞窟潛水點，因陽光折射呈現神秘湛藍光芒，吸引大量潛水客和浮潛爱好者朝聖。</div><div class="card-tags"><span class="card-tag">🤿 浮潛/潛水</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',11)"><div class="card-img"><img src="images/spot_12.jpg" alt="部瀨名海中公園" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.2)</span></div><div class="card-body"><div class="card-title">部瀨名海中公園</div><div class="card-summary">可乘坐玻璃底船或走入海中展望台的海中公園，透過船底透明玻璃即可觀賞珊瑚礁和熱帶魚群。</div><div class="card-tags"><span class="card-tag">🚤 海上活動</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',12)"><div class="card-img"><img src="images/spot_13.jpg" alt="知念岬公園" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.3)</span></div><div class="card-body"><div class="card-title">知念岬公園</div><div class="card-summary">位於南城市的懸崖公園，可遠眺蔚藍大海與下地島機場跑道，是欣賞日出日落的秘境景點。</div><div class="card-tags"><span class="card-tag">🌅 自然景觀</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',13)"><div class="card-img"><img src="images/spot_14.jpg" alt="殘波岬" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐⭐ (4.4)</span></div><div class="card-body"><div class="card-title">殘波岬</div><div class="card-summary">沖繩本島最西端的斷崖絕壁，白色的燈塔佇立於上，夕陽時分景色壯闘，是情侶聖地。</div><div class="card-tags"><span class="card-tag">🌅 自然景觀</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',14)"><div class="card-img"><img src="images/spot_15.jpg" alt="港川外人住宅" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.3)</span></div><div class="card-body"><div class="card-title">港川外人住宅</div><div class="card-summary">美軍遺留的彩色住宅區，巷弄間處處是可愛小店和咖啡館，是近年最夯的文青打卡勝地。</div><div class="card-tags"><span class="card-tag">📸 文青打卡</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',15)"><div class="card-img"><img src="images/spot_16.jpg" alt="中城公園" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.2)</span></div><div class="card-body"><div class="card-title">中城公園</div><div class="card-summary">日本最大型的戶外體能挑戰公園，結合繩索、雲梯、平衡木等設施，適合各年齡層挑戰。</div><div class="card-tags"><span class="card-tag">🧗 戶外體能</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',16)"><div class="card-img"><img src="images/spot_17.jpg" alt="BIOS之丘" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.1)</span></div><div class="card-body"><div class="card-title">BIOS之丘</div><div class="card-summary">以亞熱帶自然森林為背景的主題樂園，可搭乘小船漂流森林運河，近距離接觸可愛動物。</div><div class="card-tags"><span class="card-tag">🌿 自然森林</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('spot',17)"><div class="card-img"><img src="images/spot_18.jpg" alt="奧武島" loading="lazy"><span class="card-badge">🌟 景點</span><span class="card-stars">⭐⭐⭐⭐ (4.3)</span></div><div class="card-body"><div class="card-title">奧武島</div><div class="card-summary">以貓咪天堂聞名的小島，島上處處可見悠闘的貓咪身影，踏上島就彷彿進入療癒的喵星人王國。</div><div class="card-tags"><span class="card-tag">🐱 貓咪聖地</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+        </div>
+        </div>
+        <div class="gallery-section" id="restaurants">
+            <div class="gallery-grid" id="restaurants-grid"><div class="place-card" onclick="openModal('restaurant',0)"><div class="card-img"><img src="images/food_01_furin_kazan.jpg" alt="風林火山" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.3)</span></div><div class="card-body"><div class="card-title">風林火山</div><div class="card-summary">在地人推薦的烤魚定食套餐，烤魚定食650円起，附沙拉吧無限吃。</div><div class="card-tags"><span class="card-tag rt">🍚 定食</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',1)"><div class="card-img"><img src="images/food_02_ryukyu_gyu.jpg" alt="琉球的牛" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐⭐ (4.5)</span></div><div class="card-body"><div class="card-title">琉球的牛（琉球の牛）</div><div class="card-summary">超人氣A5和牛燒肉！恩納店和北谷店採預約制，需三天前預訂。</div><div class="card-tags"><span class="card-tag rt">🍖 燒肉</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',2)"><div class="card-img"><img src="images/food_03_en_danshaku.jpg" alt="En男爵" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐⭐ (4.5)</span></div><div class="card-body"><div class="card-title">En男爵和牛燒肉</div><div class="card-summary">當地人推薦的高級燒肉店，稀少部位肉品拼盤，肉質等級極佳。</div><div class="card-tags"><span class="card-tag rt">🍖 燒肉</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',3)"><div class="card-img"><img src="images/food_04_yakiniku_oh.jpg" alt="燒肉王" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.2)</span></div><div class="card-body"><div class="card-title">燒肉王（焼肉KING）</div><div class="card-summary">和牛吃到飽套餐、牛五花、特選肝連，吃到滿足！</div><div class="card-tags"><span class="card-tag rt">🍖 吃到飽</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',4)"><div class="card-img"><img src="images/food_05_tongtang_ramen.jpg" alt="通堂拉麵" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.0)</span></div><div class="card-body"><div class="card-title">通堂拉麵（琉球新麺 通堂）</div><div class="card-summary">超人氣排隊拉麵！男人麵（豚骨）、女人麵（鹽味），口味偏重台灣人接受度高。</div><div class="card-tags"><span class="card-tag rt">🍜 拉麵</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',5)"><div class="card-img"><img src="images/food_06_danbo_ramen.jpg" alt="暖暮拉麵" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.1)</span></div><div class="card-body"><div class="card-title">暖暮拉麵</div><div class="card-summary">沖繩人氣最高的拉麵店之一！豚骨拉麵、叉燒拉麵，許多多分店遍布全島。</div><div class="card-tags"><span class="card-tag rt">🍜 拉麵</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',6)"><div class="card-img"><img src="images/food_07_hanajin.jpg" alt="花人逢" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.2)</span></div><div class="card-body"><div class="card-title">花人逢（花人逢 かじんほう）</div><div class="card-summary">熔岩Pizza、半熟蛋Pizza、海鮮義大利麵，每週二週三公休。</div><div class="card-tags"><span class="card-tag rt">🍕 景觀餐廳</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',7)"><div class="card-img"><img src="images/food_08_hamabe_no_chaya.jpg" alt="浜辺の茶屋" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.3)</span></div><div class="card-body"><div class="card-title">浜辺の茶屋（海邊的茶屋）</div><div class="card-summary">黑糖冰淇淋、紅芋甜點、咖啡，就位在海灘旁，網美打卡聖地！</div><div class="card-tags"><span class="card-tag rt">☕ 下午茶</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',8)"><div class="card-img"><img src="images/food_09_makishi_market.jpg" alt="第一牧志公設市場" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.4)</span></div><div class="card-body"><div class="card-title">第一牧志公設市場</div><div class="card-summary">2023年重新整修後開幕，1樓買食材、2樓代客料理，石垣牛、阿古豬、海鮮應有盡有。</div><div class="card-tags"><span class="card-tag rt">🦐 海鮮市場</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',9)"><div class="card-img"><img src="images/food_10.jpg" alt="浜屋沖繩麵" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.3)</span></div><div class="card-body"><div class="card-title">浜屋沖繩麵（浜屋）</div><div class="card-summary">在地人大推的沖繩麵老店，軟嫩的排骨麵是必點，藏身在巷弄中的人氣排隊名店。</div><div class="card-tags"><span class="card-tag rt">🍜 沖繩麵</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',10)"><div class="card-img"><img src="images/food_11.jpg" alt="中本天婦羅" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.2)</span></div><div class="card-body"><div class="card-title">中本天婦羅（本店）</div><div class="card-summary">沖繩代表性天婦羅專賣店，金黃酥脆的炸物配上山藥飯，是讓人念念不忘的的古早味。</div><div class="card-tags"><span class="card-tag rt">🍤 炸物</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',11)"><div class="card-img"><img src="images/food_12.jpg" alt="グルメ迴轉壽司市場" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.1)</span></div><div class="card-body"><div class="card-title">グルメ迴轉壽司市場（グルメ寿司 市场）</div><div class="card-summary">在地人推薦的高CP值迴轉壽司，使用瀨底海鮮，新鮮美味又平價，是家庭用餐的好選擇。</div><div class="card-tags"><span class="card-tag rt">🍣 迴轉壽司</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',12)"><div class="card-img"><img src="images/food_13.jpg" alt="JEF Burger苦瓜漢堡" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.0)</span></div><div class="card-body"><div class="card-title">JEF Burger 苦瓜漢堡（JEFバーガー）</div><div class="card-summary">以苦瓜漢堡聞名的沖繩限定速食，結合在地食材苦瓜與漢堡肉，清爽又具特色。</div><div class="card-tags"><span class="card-tag rt">🍔 速食</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',13)"><div class="card-img"><img src="images/food_14.jpg" alt="海洋食堂" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.2)</span></div><div class="card-body"><div class="card-title">海洋食堂（海鮮食堂）</div><div class="card-summary">緊鄰海邊的海鮮餐廳，可品嚐到最新鮮的龍蝦、海膽和各式海魚，邊吃邊欣賞無敵海景。</div><div class="card-tags"><span class="card-tag rt">🦐 海鮮</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',14)"><div class="card-img"><img src="images/food_15.jpg" alt="Cafe薑黃花" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.1)</span></div><div class="card-body"><div class="card-title">Cafe薑黃花（くるくまの丘）</div><div class="card-summary">以沖繩香草與薑黃花製成的健康料理聞名，餐點精緻優雅，庭院的花園景色優美放鬆。</div><div class="card-tags"><span class="card-tag rt">☕ 健康料理</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',15)"><div class="card-img"><img src="images/food_16.jpg" alt="塔可飯咖啡Kijimuna" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.0)</span></div><div class="card-body"><div class="card-title">塔可飯咖啡 Kijimuna（キジムナ珈琲）</div><div class="card-summary">以沖繩代表性美食塔可飯聞名的咖啡店，結合美式風格與在地食材，是早餐和早午餐的首選。</div><div class="card-tags"><span class="card-tag rt">🌮 塔可飯</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+<div class="place-card" onclick="openModal('restaurant',16)"><div class="card-img"><img src="images/food_17.jpg" alt="幸福鬆餅" loading="lazy"><span class="card-badge">🍖 餐廳</span><span class="card-stars">⭐⭐⭐⭐ (4.3)</span></div><div class="card-body"><div class="card-title">幸福鬆餅（幸せのパンケーキ）</div><div class="card-summary">超人氣的舒芙蕾鬆餅，蓬鬆柔軟入口即化，抹茶、奶油、蜂蜜口味各有特色。</div><div class="card-tags"><span class="card-tag rt">🥞 甜點</span></div><div class="card-expand-hint">點我看詳情 →</div></div></div>
+        </div>
+        </div>
+        </div>
+        <div class="gallery-section" id="itinerary">
+
+        <div class="alert-box">
+            <span class="icon">⚠️</span>
+            <div>
+                <strong>整合版 v2！</strong>結合少爺偏好 + AI參考行程<br>
+                ✅ Day 3 取車 + DMM水族館 + 萬座毛 + 勝連城跡 → BEB5<br>
+                ✅ Day 7：AEON Mall Rycom 最後補貨 → 慢慢開回Naha → 機場<br>
+                ⚠️ <strong>7月旺季強烈建議現在就預約租車！</strong>
+            </div>
+        </div>
+
+        <div class="route-flow">
+            <h3>🚗 每日動線總覽</h3>
+            <div class="route-line">
+                <span class="route-stop">Day1 Naha</span>
+                <span class="arrow">→</span>
+                <span class="route-stop">Day2 Naha</span>
+                <span class="arrow">→</span>
+                <span class="route-stop">Day3 取車→DMM→萬座毛→勝連→BEB5</span>
+                <span class="arrow">→</span>
+                <span class="route-stop">Day4-5 北部純玩</span>
+                <span class="arrow">→</span>
+                <span class="route-stop">Day6 中部來回</span>
+                <span class="arrow">→</span>
+                <span class="route-stop">Day7 AEON Rycom→國際通→還車</span>
+            </div>
+        </div>
+
+        <!-- Day 1 -->
+        <div class="day-card">
+            <div class="day-header d1">
+                <h2>📅 Day 1</h2>
+                <span class="date">7月19日 (六) - 出發日</span>
+            </div>
+            <div class="day-content">
+                <div class="flight-info">
+                    <span class="flight-icon">🛫</span>
+                    <div class="flight-details">
+                        <div class="flight-name">星宇航空 JX312</div>
+                        <div class="flight-route">台中 → 沖繩</div>
+                        <div class="flight-time">16:40 起飛 → 19:10 抵達</div>
+                    </div>
+                </div>
+                <div class="activities">
+                    <div class="activity">
+                        <span class="activity-emoji">🚕</span>
+                        <div class="activity-content">
+                            <div class="activity-title">搭乘計程車前往飯店</div>
+                            <div class="activity-desc">Day 1-2 不租車！抵達那霸機場後搭乘計程車直達東京急Stay那霸（約15-20分鐘，約1500円）</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🏨</span>
+                        <div class="activity-content">
+                            <div class="activity-title">入住：東京急Stay那霸 <span class="zone-tag zone-naha">那霸</span></div>
+                            <div class="activity-desc">2晚 · 位置絕佳，靠近國際通，步行逛街超方便！</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="meals">
+                    <div class="meals-title">🍽️ 今日餐食</div>
+                    <div class="meal-row"><span class="meal-icon">🌅</span><span class="meal-label">早餐</span> ✈️ 飛機上</div>
+                    <div class="meal-row"><span class="meal-icon">☀️</span><span class="meal-label">午餐</span> ✈️ 飛機上</div>
+                    <div class="meal-row"><span class="meal-icon">🌙</span><span class="meal-label">晚餐</span> <span class="meal-restaurant">琉球之牛（國際通）</span> <span class="meal-note">🌟 高級和牛燒肉，抵達第一晚小確幸！</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 2 -->
+        <div class="day-card">
+            <div class="day-header d2">
+                <h2>📅 Day 2</h2>
+                <span class="date">7月20日 (日) - 那霸市區深度遊</span>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <div class="activity">
+                        <span class="activity-emoji">🏛️</span>
+                        <div class="activity-content">
+                            <div class="activity-title">波上宮 + 波之上海灘 <span class="zone-tag zone-naha">那霸</span></div>
+                            <div class="activity-desc">沖繩最上位的神社，俯瞰大海的絕佳景色（計程車約10分鐘）</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🏯</span>
+                        <div class="activity-content">
+                            <div class="activity-title">首里城公園 <span class="zone-tag zone-naha">那霸</span></div>
+                            <div class="activity-desc">世界文化遺產，琉球王國的象徵（單軌電車至首里站）</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🛍️</span>
+                        <div class="activity-content">
+                            <div class="activity-title">國際通逛街 <span class="zone-tag zone-naha">那霸</span></div>
+                            <div class="activity-desc">下午購物、逛街（從飯店步行可達）</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hotel-info">
+                    <span class="hotel-emoji">🏨</span>
+                    <div class="hotel-content">
+                        <div class="hotel-name">東京急Stay那霸（續住）</div>
+                        <div class="hotel-nights">Day 2 住宿</div>
+                    </div>
+                </div>
+                <div class="meals">
+                    <div class="meals-title">🍽️ 今日餐食</div>
+                    <div class="meal-row"><span class="meal-icon">🌅</span><span class="meal-label">早餐</span> <span class="meal-restaurant">風林火山</span> <span class="meal-note">🌟 早上7:00就開！烤魚定食650円起，附沙拉吧</span></div>
+                    <div class="meal-row"><span class="meal-icon">☀️</span><span class="meal-label">午餐</span> <span class="meal-restaurant">En男爵和牛燒肉</span> <span class="meal-note">（超人氣！強烈建議提前預約）</span></div>
+                    <div class="meal-row"><span class="meal-icon">🌙</span><span class="meal-label">晚餐</span> <span class="meal-restaurant">AEON Mall 美食街</span> <span class="meal-note">（順路去寶可夢中心！）</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 3 -->
+        <div class="day-card">
+            <div class="day-header d3">
+                <h2>📅 Day 3</h2>
+                <span class="date">7月21日 (一) - 取車日：DMM水族館 → 萬座毛 → 勝連城跡 → BEB5</span>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <div class="activity">
+                        <span class="activity-emoji">🚗</span>
+                        <div class="activity-content">
+                            <div class="activity-title">退房 → 領取租車 <span class="zone-tag zone-naha">那霸</span></div>
+                            <div class="activity-desc">Day 3 開始租車！旭橋站或壺川站附近取車（OTS/Times/Nippon）</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🐬</span>
+                        <div class="activity-content">
+                            <div class="activity-title">DMM水族館（豐見城市）<span class="zone-tag zone-central">南部</span></div>
+                            <div class="activity-desc">上午場，9:00開園，可以與生物零距離互動、餵食體驗（玩2-2.5小時）</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🏖️</span>
+                        <div class="activity-content">
+                            <div class="activity-title">南部海邊玩沙（新原海灘）<span class="zone-tag zone-central">南部</span></div>
+                            <div class="activity-desc">⭐芃芃指定！美麗沙灘戲水玩沙</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🏖️</span>
+                        <div class="activity-content">
+                            <div class="activity-title">萬座毛 <span class="zone-tag zone-central">中部</span></div>
+                            <div class="activity-desc">象鼻岩，壯闘海景懸崖！從Naha往北第一站</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🏰</span>
+                        <div class="activity-content">
+                            <div class="activity-title">勝連城跡 <span class="zone-tag zone-central">中部</span></div>
+                            <div class="activity-desc">世界文化遺產，眺望大海（萬座毛→勝連城跡約20分鐘）</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🏨</span>
+                        <div class="activity-content">
+                            <div class="activity-title">入住 BEB5 瀨良垣 <span class="zone-tag zone-north">北部</span></div>
+                            <div class="activity-desc">下午入住！BEB5 就在瀨良垣海灘旁邊（稍晚可去海灘放空）</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="hotel-info">
+                    <span class="hotel-emoji">🏨</span>
+                    <div class="hotel-content">
+                        <div class="hotel-name">BEB5 瀨良垣（星野集團）</div>
+                        <div class="hotel-nights">Day 3-6 住宿（共4晚）· 有廚房、洗衣機</div>
+                    </div>
+                </div>
+                <div class="meals">
+                    <div class="meals-title">🍽️ 今日餐食</div>
+                    <div class="meal-row"><span class="meal-icon">🌅</span><span class="meal-label">早餐</span> <span class="meal-restaurant">豬肉蛋飯糰</span> <span class="meal-note">🌟 牧志市場旁，在地人推薦！取車前吃</span></div>
+                    <div class="meal-row"><span class="meal-icon">☀️</span><span class="meal-label">午餐</span> <span class="meal-restaurant">系滿海鮮市場</span> <span class="meal-note">🌟 DMM順路！平價海鮮，超鮮！</span></div>
+                    <div class="meal-row"><span class="meal-icon">🌙</span><span class="meal-label">晚餐</span> <span class="meal-restaurant">阿古豬隱家（萬座毛附近）</span> <span class="meal-note">🌟 高級阿古豬燒肉，取車日小確幸！</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 4 -->
+        <div class="day-card">
+            <div class="day-header d4">
+                <h2>📅 Day 4</h2>
+                <span class="date">7月22日 (二) - 北部：古宇利島 + 鳳梨園 + 海洋博</span>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <div class="activity">
+                        <span class="activity-emoji">🌉</span>
+                        <div class="activity-content">
+                            <div class="activity-title">古宇利島 <span class="zone-tag zone-north">北部</span></div>
+                            <div class="activity-desc">跨海大橋，戀人聖地，心形石頭，海水清澈見底</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🍍</span>
+                        <div class="activity-content">
+                            <div class="activity-title">鳳梨園 <span class="zone-tag zone-north">北部</span></div>
+                            <div class="activity-desc">試吃鳳梨冰、認識鳳梨生態，買鳳梨相關伴手禮</div>
+                        </div>
+                    </div>
+       
+                    <div class="activity">
+                        <span class="activity-emoji">🐠</span>
+                        <div class="activity-content">
+                            <div class="activity-title">美ら海水族館 <span class="zone-tag zone-north">北部</span></div>
+                            <div class="activity-desc">世界最大的黑潮之海水族箱，鯊魚、魟魚群游，超震撼！</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🐢</span>
+                        <div class="activity-content">
+                            <div class="activity-title">海龜館 <span class="zone-tag zone-north">北部</span></div>
+                            <div class="activity-desc">近距離接觸可愛的海龜，緊鄰美ら海水族館</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="meals">
+                    <div class="meals-title">🍽️ 今日餐食</div>
+                    <div class="meal-row"><span class="meal-icon">🌅</span><span class="meal-label">早餐</span> <span class="meal-restaurant">C&C BREAKFASAST</span> <span class="meal-note">🌟 舒芙蕾鬆糕，網美風早餐！9:00開</span></div>
+                    <div class="meal-row"><span class="meal-icon">☀️</span><span class="meal-label">午餐</span> <span class="meal-restaurant">燒肉本部牧場</span> <span class="meal-note">🌟 午間套餐1500円起，阿古豬+和牛高CP！</span></div>
+                    <div class="meal-row"><span class="meal-icon">🌙</span><span class="meal-label">晚餐</span> <span class="meal-restaurant">BEB5 自炊</span> <span class="meal-note">（附近 Ito Yokado 超市買食材）</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 5 -->
+        <div class="day-card">
+            <div class="day-header d5">
+                <h2>📅 Day 5</h2>
+                <span class="date">7月23日 (三) - 北部：今帰仁城跡 + 備瀨一棵柱</span>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <div class="activity">
+                        <span class="activity-emoji">🏰</span>
+                        <div class="activity-content">
+                            <div class="activity-title">今帰仁城跡 <span class="zone-tag zone-north">北部</span></div>
+                            <div class="activity-desc">世界文化遺產，曾是琉球王國第二大的城跡，賞櫻聖地</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🌳</span>
+                        <div class="activity-content">
+                            <div class="activity-title">備瀨一棵柱（海博館附近）<span class="zone-tag zone-north">北部</span></div>
+                            <div class="activity-desc">非常有名的打卡景點，走進巨大的榕樹氣根中</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🌿</span>
+                        <div class="activity-content">
+                            <div class="activity-title">北部海岸風光悠閒散步 <span class="zone-tag zone-north">北部</span></div>
+                            <div class="activity-desc">放慢腳步，享受海岸線美景</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">☕</span>
+                        <div class="activity-content">
+                            <div class="activity-title">浜辺の茶屋（下午茶）<span class="zone-tag zone-south">南部</span></div>
+                            <div class="activity-desc">🌟 海岸線上邊看海邊喝咖啡，浪漫下午茶！建議16:00前到</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="meals">
+                    <div class="meals-title">🍽️ 今日餐食</div>
+                    <div class="meal-row"><span class="meal-icon">🌅</span><span class="meal-label">早餐</span> <span class="meal-restaurant">風林火山</span> <span class="meal-note">🌟 再訪風林火山，早上7:00就開！烤魚定食650円起，附沙拉吧</span></div>
+                    <div class="meal-row"><span class="meal-icon">☀️</span><span class="meal-label">午餐</span> <span class="meal-restaurant">花人逢（北部景觀餐廳）</span> <span class="meal-note">🌟 邊看海邊吃，沖繩代表性景觀餐廳！</span></div>
+                    <div class="meal-row"><span class="meal-icon">🌙</span><span class="meal-label">晚餐</span> <span class="meal-restaurant">BEB5 自炊</span> <span class="meal-note">（輕鬆回民宿，整理行李）</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 6 -->
+        <div class="day-card">
+            <div class="day-header d6">
+                <h2>📅 Day 6</h2>
+                <span class="date">7月24日 (四) - 中部：沖繩兒童王國 + アメリカ村</span>
+            </div>
+            <div class="day-content">
+                <div class="activities">
+                    <div class="activity">
+                        <span class="activity-emoji">🦒</span>
+                        <div class="activity-content">
+                            <div class="activity-title">沖繩兒童王國 <span class="zone-tag zone-central">中部</span> ⭐芃芃最愛！</div>
+                            <div class="activity-desc">動物王國！可以近距離接觸動物（開車南下約40分鐘）</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🛒</span>
+                        <div class="activity-content">
+                            <div class="activity-title">AEON Mall 永旺夢樂城 <span class="zone-tag zone-central">中部</span></div>
+                            <div class="activity-desc">最後購物補貨，超市、藥妝（下午時段）</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🌅</span>
+                        <div class="activity-content">
+                            <div class="activity-title">アメリカ村（美國村）<span class="zone-tag zone-central">中部</span></div>
+                            <div class="activity-desc">美式風情海灘，看夕陽！傍晚時段</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="meals">
+                    <div class="meals-title">🍽️ 今日餐食</div>
+                    <div class="meal-row"><span class="meal-icon">🌅</span><span class="meal-label">早餐</span> <span class="meal-restaurant">BEB5 自炊</span></div>
+                    <div class="meal-row"><span class="meal-icon">☀️</span><span class="meal-label">午餐</span> <span class="meal-restaurant">沖繩兒童王國園內餐廳</span> <span class="meal-note">（漢堡、咖哩飯、輕食）</span></div>
+                    <div class="meal-row"><span class="meal-icon">🌙</span><span class="meal-label">晚餐</span> <span class="meal-restaurant">燒肉王（燒肉吃到飽）</span> <span class="meal-note">（北部燒肉王！強烈建議提前預約）</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Day 7 -->
+        <div class="day-card">
+            <div class="day-header d7">
+                <h2>📅 Day 7</h2>
+                <span class="date">7月25日 (五) - 返程日：AEON Mall Rycom → 慢慢開回Naha → 機場</span>
+            </div>
+            <div class="day-content">
+                <div class="flight-info" style="background: linear-gradient(135deg, #eb3349, #f45c43);">
+                    <span class="flight-icon">🛫</span>
+                    <div class="flight-details">
+                        <div class="flight-name">星宇航空 JX313</div>
+                        <div class="flight-route">沖繩 → 台中</div>
+                        <div class="flight-time">20:10 起飛 → 20:50 抵達（時間充裕，慢慢玩！）</div>
+                    </div>
+                </div>
+                <div class="activities">
+                    <div class="activity">
+                        <span class="activity-emoji">🍳</span>
+                        <div class="activity-content">
+                            <div class="activity-title">整理行李退房 <span class="zone-tag zone-north">北部</span></div>
+                            <div class="activity-desc">BEB5 最後悠閒時光，整理行李退房</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🛍️</span>
+                        <div class="activity-content">
+                            <div class="activity-title">AEON Mall Rycom（中部）<span class="zone-tag zone-central">中部</span></div>
+                            <div class="activity-desc">寶可夢中心！最後補貨、藥妝、超市（AEON Mall內有Pokemon Center）</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🛍️</span>
+                        <div class="activity-content">
+                            <div class="activity-title">國際通最後逛街 / 藥妝補貨 <span class="zone-tag zone-naha">那霸</span></div>
+                            <div class="activity-desc">慢慢開回Naha，午餐後國際通最後逛街</div>
+                        </div>
+                    </div>
+                    <div class="activity">
+                        <span class="activity-emoji">🚗</span>
+                        <div class="activity-content">
+                            <div class="activity-title">還車 → 那霸機場 <span class="zone-tag zone-naha">那霸</span></div>
+                            <div class="activity-desc">還車（還車前程加滿油！）→ 前往機場</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="meals">
+                    <div class="meals-title">🍽️ 今日餐食</div>
+                    <div class="meal-row"><span class="meal-icon">🌅</span><span class="meal-label">早餐</span> <span class="meal-restaurant">牧志市場（猪肉蛋飯糰）</span> <span class="meal-note">🌟 早起逛市場，最道地的最後早餐！</span></div>
+                    <div class="meal-row"><span class="meal-icon">☀️</span><span class="meal-label">午餐</span> <span class="meal-restaurant">第一牧志公設市場（代客料理）</span> <span class="meal-note">🌟 買海鮮現烤，最後的沖繩味道！</span></div>
+                    <div class="meal-row"><span class="meal-icon">🌙</span><span class="meal-label">晚餐</span> ✈️ 飛機上</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <h2>🌺 兩家人一起的美好回憶 🌺</h2>
+            <p>7天6夜的沖繩之旅 | Day 1-2 那霸市區 | Day 3-7 北部BEB5</p>
+            <p style="margin-top: 12px; opacity: 0.7;">❤️ Made with love by 龍龍</p>
+            <div class="hearts">💕</div>
+        </div>
+
+        </div><!-- end itinerary -->
+    </div><!-- end container -->
+
+
+    <div class="modal-overlay" id="modal-spot-0">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_01_churaumi.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',0)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐⭐ (4.5)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">美ら海水族館（美麗海水族館）</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">沖繩美ら海水族館是大家初次來沖繩必訪的景點，館內有7,500立方公尺的「黑潮之海」水槽，是世界最大的水槽之一，更有深受大人小孩喜愛的海豚秀。2014年重新裝潢後更加華麗，設施也非常完善，建議安排半天到一天時間遊覽。</div></div><div class="modal-sec"><div class="modal-sec-title">🚗 交通方式</div><div class="modal-sec-content">從Naha開車經高速公路約2小時可達，導航設定「美ら海水族館」</div></div><div class="modal-sec"><div class="modal-sec-title">⏰ 適合時間</div><div class="modal-sec-content">建議安排半天到一天，建議早上開園就進入</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣國頭郡本部町石川424</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">0980-48-2747</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">8:30～18:30（繁忙期可能延長）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">7月旺季人潮較多，建議提早入園。海豚秀時間請上官網確認。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">亞洲最大水族館之一，擁有世界最大的黑潮之海水槽，可近距離觀賞鯨鯊和鬼蝠魟，海豚表演也非常精彩，適合全家同樂。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-1">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_02_dmm_kariyushi.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',1)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.3)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">DMM Kariyushi水族館</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">DMM Kariyushi水族館是2020年新開幕的設施，位於豐崎海灘旁，以「生物體驗」為概念，讓遊客能與海洋生物近距離互動。</div></div><div class="modal-sec"><div class="modal-sec-title">🚗 交通方式</div><div class="modal-sec-content">從Naha開車約30分鐘可達，導航設定「DMMかりゆし水族館」</div></div><div class="modal-sec"><div class="modal-sec-title">⏰ 適合時間</div><div class="modal-sec-content">建議2-3小時，9:00開園</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣豐見城市豐崎3-35</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-851-2555</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">09:00～20:00（最後入場19:00）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">2020年新開幕設施新穎，部分互動體驗需另外付費。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">以互動體驗為特色的新穎水族館，可觸摸海牛、餵食海龜，非常適合親子同遊。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-2">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_03_kourijima.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',2)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐⭐ (4.4)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">古宇利島</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">古宇利島是琉球神話起源的「神之島」，更是情侶聖地「戀之島」。島上有著多處未經人為破壞的美麗海灘，2005年完工的古宇利大橋連接本島。2014年嵐的廣告中出現的愛心石(Heart Rock)讓這裡詢問度瞬間破表。</div></div><div class="modal-sec"><div class="modal-sec-title">🚗 交通方式</div><div class="modal-sec-content">開車經古宇利大橋可達，從北部BEB5開車約15分鐘</div></div><div class="modal-sec"><div class="modal-sec-title">⏰ 適合時間</div><div class="modal-sec-content">繞島一圈約15分鐘，建議搭配水上活動安排半天</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣國頭郡今歸仁村古宇利</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">（自由參觀）</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">全天開放（免費）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">嵐的廣告取景地，愛心石人氣超高建議一早去避開人潮。蝦蝦飯是必吃美食！</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">擁有翡翠綠的透明海洋和夢幻愛心石，是情侶必訪的浪漫聖地。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-3">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_04_manzamo.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',3)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.3)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">萬座毛</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">萬座毛位在沖繩海岸國定公園內，名字原意為「可供萬人齊坐的草原」，最大特色就是象鼻岩、遼闘草原及無敵海景。2020年新開了旅遊設施。</div></div><div class="modal-sec"><div class="modal-sec-title">🚗 交通方式</div><div class="modal-sec-content">從Naha開車約50分鐘可達，導航設定「万座毛」</div></div><div class="modal-sec"><div class="modal-sec-title">⏰ 適合時間</div><div class="modal-sec-content">建議停留30分鐘-1小時，夕陽時分景色最美</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣國頭郡恩納村山田</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-966-1020</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">8:00-19:00（1~3月）、8:00-20:00（4~10月）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">2020年新開了旅遊設施有二層付費觀景台。夏季炎熱請注意防曬補水。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">象鼻岩是沖繩最具代表性的自然景觀之一，夕陽時分景色最為浪漫淒美。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-4">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_05_naminomiyagumi.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',4)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.2)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">波上宮</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">波上宮是沖繩最上位的神社，位於那霸市區懸崖上，供奉著讓人避免颱風、航海平安的神明。</div></div><div class="modal-sec"><div class="modal-sec-title">🚗 交通方式</div><div class="modal-sec-content">從國際通搭計程車約10分鐘可達</div></div><div class="modal-sec"><div class="modal-sec-title">⏰ 適合時間</div><div class="modal-sec-content">建議停留1小時，可順路遊覽波之上海灘</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣那霸市若狹1-25-2</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-866-5160</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">9:00～16:45（授所時間）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">懸崖上風大請注意安全。神社可求平安符御守。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">距離那霸市區最近的神社，適合傍晚時分前往欣賞夕陽。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-5">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_06_shurijo.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',5)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐⭐ (4.4)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">首里城</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">首里城是琉球王國時期的城堡，於2000年被列為世界文化遺產。2019年遭受大火重創後，園區大部分區域已開放參觀，目前主殿正在重建中，預計2026年完成。</div></div><div class="modal-sec"><div class="modal-sec-title">🚗 交通方式</div><div class="modal-sec-content">單軌電車至首里站，步行約15分鐘可達</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣那霸市首里金城町1-2</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-886-2020</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">免費區域 8:30～18:00，付費區域 9:00～17:30</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">目前主殿仍在重建中，預計2026年完工。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">琉球王國的世界文化遺產，代表著沖繩深厚的歷史文化。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-6">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_07_teamlab.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',6)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.2)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">teamLab Future Park 沖繩</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">teamLab 學習！未來的遊樂園沖繩於2023年12月15日正式開幕，常設展位於T Galleria by DFS 沖繩免稅店3樓。</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣那霸市泉崎1-31（T Galleria by DFS 3樓）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-862-2000</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">10:00～21:00（免稅店內，請確認DFS營業時間）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">雨天備案首選！常設展在DFS免稅店內，可逛街+看展一網打盡。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">世界知名的數位藝術團隊，雨天備案或逛街之餘都可順遊。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-7">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_08.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',7)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.0)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">寶可夢中心 沖繩</div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">AEON MALL Okinawa Rycom（北中城村）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-979-2070</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">10:00～21:00（AEON MALL內）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">沖繩限定商品只有在這裡才買得到！</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">沖繩限定商品只有在這裡才買得到，是寶可夢迷不可錯過的朝聖地。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-8">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_09.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',8)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐⭐ (4.5)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">沖繩兒童王國（Okinawa Zoo & Museum）</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">Okinawa Zoo & Museum是結合動物園和博物館的主題樂園，位於沖繩縣北部。</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣國頭郡本部町並里921-1</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">0980-48-6600</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">10:00～18:00（請確認官網）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">⭐芃芃最愛！建議安排在Day6中部行程中，夏季請注意防曬。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">結合動物園和博物館的複合型設施，非常適合帶小朋友的家庭。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-9">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_10_senagashima.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',9)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.3)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">瀨長島</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">瀨長島是距離那霸機場僅15分鐘車程的迷你海島，純白色的地中海風格建築群依山而建，讓人有置身小希臘的錯覺。</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣豐見城市瀨長（Umikaji Terrace商區）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">（商區各店鋪不同）</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">10:00～21:00（各店鋪稍有不同）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">夕陽時分可欣賞飛機起降超壯觀！ Umikaji Terrace有40多家美食餐廳。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">距離機場最近的網美打卡聖地，是安排在最後一天或剛抵達時的最佳景點。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-10">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_11.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',10)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.4)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">青之洞窟</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">青之洞窟是沖繩最具代表性的洞窟潛水點，因陽光穿透洞穴並折射形成夢幻的湛藍光芒，海水清澈見底。</div></div><div class="modal-sec"><div class="modal-sec-title">🚗 交通方式</div><div class="modal-sec-content">開車至恩納村附近的青之洞窟潛水點，附近有潛水店可報名體驗</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣國頭郡恩納村真榮田（恩納村北側沿岸）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-966-1030</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">全天開放（建議白天前往）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">參加浮潛或潛水體驗需透過當地店家預約。水中光線因天候有所不同。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">世界罕見的藍洞景觀，浮潛和深潛都能看到夢幻的藍色光芒。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-11">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_12.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',11)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.2)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">部瀨名海中公園</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">部瀨名海中公園是沖繩少數可乘坐玻璃底船和走入海中展望台的設施，透過船底透明玻璃輕鬆觀賞珊瑚礁和熱帶魚。</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣國頭郡恩納村真榮田469-1</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-966-1030</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">9:00～17:00（玻璃底船）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">颱風天或天候不佳時玻璃底船可能停航。請留意當日海象狀況。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">不用潛水也能近距離觀賞海底世界，適合不敢下水的小朋友和長輩。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-12">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_13.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',12)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.3)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">知念岬公園</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">知念岬公園位於南城市，是沖繩東南部欣賞日出的秘境景點，懸崖上的棧道延伸至蔚藍大海盡頭。</div></div><div class="modal-sec"><div class="modal-sec-title">🚗 交通方式</div><div class="modal-sec-content">從那霸開車約40分鐘可達，導航設定「知念岬公園」</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣南城市知念久手堅（齋場御嶽附近）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-948-5000</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">全天開放（免費）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">颱風季風浪較大請注意安全。建議清晨前往欣賞日出。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">欣賞日出和蔚藍大海的絕佳秘境，是內行人推薦的拍照景點。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-13">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_14.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',13)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐⭐ (4.4)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">殘波岬</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">殘波岬是沖繩本島最西端的斷崖絕壁，白色燈塔佇立於懸崖上，夕陽時分染成金橙色的海面超級浪漫。</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣島尻郡讀谷村宇座1863</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-982-5600</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">全天開放（免費），燈塔內部參觀 9:00～17:30</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">夕陽時分是最佳拍攝時機。停車場走到燈塔約5分鐘。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">沖繩夕陽最美景點，白色燈塔搭配無敵海景，是戀人必訪的浪漫聖地。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-14">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_15.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',14)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.3)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">港川外人住宅</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">港川外人住宅是美軍遺留的彩色住宅區，近年轉型成文青咖啡和選物店的聚集地，巷弄處處是驚喜。</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣浦添市港川2-15-2（港川外人住宅區）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">（各店鋪不同）</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">各店鋪略有不同，建議下午前往</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">巷弄停車位有限，建議停在外圍徒步進入。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">沖繩最夯的文青打卡聖地，彩色建築、小店、咖啡館，每個角落都是IG美照。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-15">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_16.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',15)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.2)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">中城公園</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">中城公園是日本最大規模的戶外體能挑戰公園，佔地廣闘，設有繩索、雲梯、平衡木等各種關卡。</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣中頭郡北中城村渡口2070-1</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-935-5000</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">9:00～17:00（免費）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">夏季炎熱請注意防曬和補水。穿著運動鞋較為適合。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">日本最大戶外體能公園，各年齡層都能盡情挑戰，消耗孩子體力的好去處。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-16">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_17.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',16)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.1)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">BIOS之丘</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">BIOS之丘是結合亞熱帶自然森林的主題樂園，可搭乘小船漂流於森林運河中，近距離接觸水豚、山羊等可愛動物。</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣國頭郡恩納村名嘉真</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-966-1133</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">9:00～18:00（請確認官網）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">森林運河划船夏季較熱，建議早晨或傍晚前往。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">在亞熱帶森林中近距離接觸小動物，划船運河體驗非常特別。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-spot-17">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/spot_18.jpg" alt=""><button class="modal-close" onclick="closeModal('spot',17)">✕</button><div class="modal-stars-overlay">⭐⭐⭐⭐ (4.3)</div></div><div class="modal-body"><div class="modal-cat">🌟 景點</div><div class="modal-title">奧武島</div><div class="modal-sec"><div class="modal-sec-title">📖 遊記摘要</div><div class="modal-sec-content">奧武島以街貓天堂聞名，島上處處可見悠闘的貓咪，是愛貓人士的夢幻朝聖地。</div></div><div class="modal-sec"><div class="modal-sec-title">🚗 交通方式</div><div class="modal-sec-content">從那霸開車約50分鐘，經平坦公路可達</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">沖繩縣島尻郡南風原町奧武（奧武島）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">（自由參觀）</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">全天開放（免費）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">街貓較敏感，請勿任意觸摸或喂食人類食物。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 推薦理由</div><div class="modal-sec-content modal-reason">貓咪愛好者的夢幻島嶼，悠闘的貓咪處處可見，療癒感十足。</div></div></div></div>
+    </div>
+
+    <!-- Restaurant Modals -->
+    <div class="modal-overlay" id="modal-restaurant-0">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_01_furin_kazan.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',0)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">風林火山</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 烤魚定食（650円～950円）、高湯茶泡飯、阿古豬定食。白飯、味噌湯、咖啡免費續杯。沙拉吧無限吃！</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">那霸市松尾1-6-30</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-868-3285</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">7:00～14:00（週二・週三公休）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 週二週三公休！沒有專用停車場，距離縣廳前站步行4分鐘。早上7點就開，想吃早餐的話務必早點到！</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">在地人推薦的烤魚專賣店！烤魚外酥內嫩，高湯茶泡飯更是人氣招牌，清爽又暖胃。早上7點就營業，是安排行程早餐的好選擇。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-1">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_02_ryukyu_gyu.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',1)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">琉球的牛（琉球の牛）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 A5和牛燒肉（入口即化！）、縣產頂級和牛、特選牛舌、泡菜拼盤。使用紅外線烤網無油煙，可優雅烤肉。</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">恩納店：恩納村瀨良垣2260｜北谷店：北谷町美浜8-3</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-936-1234</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">17:00-22:30（最後點餐21:40）⚠️ 目前只有晚餐時段</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 超人氣排隊燒肉！恩納店和北谷店採預約制，需三天前預訂！恩納別館有獨立包廂，用餐體驗更好。目前午間套餐已取消，想吃要多準備預算喔！</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">沖繩最知名的和牛燒肉店！使用縣產頂級和牛，油花均勻細膩，入口即化的好滋味讓人念念不忘。還附烤肉說明書教你怎麼烤最好吃。</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-2">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_03_en_danshaku.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',2)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">En男爵和牛燒肉（男爵和牛焼肉 En）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 A5和牛、稀少部位肉品拼盤（當地人推薦！）</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">恩納村（建議導航搜尋「男爵和牛」）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">（上官網預約）</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">需電話或網路預約（請以店家公告為準）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 當地人推薦的高級燒肉店，肉質等級極佳。建議提前預約穿著舒適前往。找不到太多網路評價，建議直接致電店家詢問。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">當地人低調推薦的高級燒肉店，稀少部位肉品拼盤是招牌，喜歡吃和牛的人不要錯過！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-3">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_04_yakiniku_oh.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',3)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">燒肉王（焼肉きんぐ）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 和牛吃到飽100分鐘！三種方案：58種(3,058円)、金王(3,498円)、高級(4,378円)。牛五花、特選肝連、阿古豬、山原雞肉</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">久茂地店：那霸市久茂地1-7-1｜各分店</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-860-4129</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">11:00～23:00（各分店略有不同）久茂地店：日～木 11:00-24:00，金土 17:00-24:00</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 和牛燒肉吃到飽！建議提前預約，用餐限時90分鐘。久茂地店離國際通較近。價格越高肉質越高級。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">沖繩知名燒肉吃到飽，100分鐘牛雞豬海鮮all you can eat！CP值高，適合想吃肉吃到爽的家庭聚餐！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-4">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_05_tongtang_ramen.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',4)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">通堂拉麵（琉球新麺 通堂）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 男人麵（濃郁豚骨）、女人麵（清爽鹽味）、煎餃、免費辣味豆芽菜（必拿！）半熟蛋也是人氣配料</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">那霸市小祿307-1（小祿本店）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-857-5577</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">11:00～25:00（小祿本店）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 超人氣排隊拉麵！本店在小祿站附近，用餐時段常大排長龍。口味偏重但台灣人接受度高。免費辣味豆芽菜必吃，非常開胃解膩！</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">沖繩必吃拉麵之一！男人麵女人麵各有特色，濃郁豚骨對決清爽鹽味，配上免費辣豆芽讓人一口接一口！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-5">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_06_danbo_ramen.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',5)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">暖暮拉麵</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 香蔥芝麻拉麵、豚骨拉麵、叉燒拉麵、烈火拉麵。可自選麵條粗細、湯頭濃郁度。全沖繩有6間分店！</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">牧誌店：那霸市松尾1-1-1｜全縣多間分店</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-884-0606</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">11:00-02:00（深夜也吃得到！）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 曾擊敗一蘭獲得九州拉麵冠軍！國際通牧誌店人潮最多，建議去其他分店（如中城店、糸滿店）較不用排隊。湯頭濃郁又不會太鹹，可以調整客製化。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">台灣人最愛的沖繩拉麵！濃郁豚骨湯頭搭配芝麻蔥花，香氣撲鼻。可以自選麵條硬度、湯頭濃度，完全符合個人口味！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-6">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_07_hanajin.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',6)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">花人逢（花人逢 かじんほう）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 熔岩Pizza（招牌！外酥內軟）、半熟蛋Pizza、海鮮義大利麵。店家備有草帽和扇子給客人避暑</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">恩納村山田1123-1</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-966-2155</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">11:30-19:00（週二・週三公休）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 每週二週三公休！排隊人潮多（可能等30分鐘以上），建議一開店就衝。沒有附設停車場需路邊停車。在北部山區半山腰，開車要走一段山路</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">沖繩最有名的景觀餐廳！窯烤披薩現點現做，熔岩Pizza外酥內軟超好吃。坐在古樸琉球老屋望著無敵海景，氣氛滿分！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-7">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_08_hamabe_no_chaya.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',7)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">浜辺の茶屋（海邊的茶屋）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 黑糖冰淇淋（必吃！）、紅芋甜點、咖啡、茶類飲品</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">恩納村谷茶149（谷茶灣）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-966-2210</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">週一～週四 10:00～18:00（08:00～10:00早午餐預約制）；週五～週日 10:00～18:00</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 就在海灘旁邊，氣氛悠閒放鬆是網美打卡聖地！建議傍晚時分前往，可以欣賞夕陽。早上8-10點早午餐時段採預約制</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">緊鄰海岸線的景觀咖啡廳，黑糖冰淇淋甜而不膩，搭配無敵海景超浪漫！是放空發呆的最佳去處</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-8">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_09_makishi_market.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',8)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">第一牧志公設市場</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 石垣牛、阿古豬、龍蝦沙西米、夜光貝、海膽、海葡萄。1樓挑食材→2樓代客料理</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">那霸市松尾1-11-1</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-866-4768</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">1樓 8:00-21:00，2樓料理店 11:00-22:00</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 2023年重新整修開幕！1樓買食材、2樓代客料理（代客料理費約500-1000円/人）。建議早上去海鮮最新鮮，海鮮可以議價！人均1000台幣出頭就能吃龍蝦</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">「沖繩人的廚房」！新鲜海鮮直接從漁港到餐桌，龍蝦沙西米、海膽超鮮甜！自己挑選再代客烹調，體驗有趣又有成就感</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-9">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_10.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',9)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">浜屋沖繩麵（浜屋）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 軟骨麵（入口即化！必吃）、排骨麵（滷到軟嫩的豬五花）、浜屋そば、三枚肉そば。推薦加辣椒泡盛超對味！</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">那霸市安里388-6</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-884-0610</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">11:00～20:30（售完即休息）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 藏身巷弄的排隊名店！軟骨肉入口即化堪稱一絕，許多人心中的沖繩麵第一名！建議開店前抵達排隊。沒有附設停車場。</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">沖繩麵靈魂食物！軟骨肉滷到超級軟爛，輕輕一咬就在口中化開。搭配特調辣椒泡盛調味，爆炸美味！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-10">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_11.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',10)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">中本天婦羅（本店）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 鮮蝦天婦羅（130円）、花枝天婦羅（100円）、鮮魚天婦羅、炸蔬菜。山藥飯配上天婦羅是經典吃法！</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">南風原町奧武194（奧武島）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-888-0419</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">11:00～19:30（週日公休）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 沖繩代表性天婦羅！每週日公休。銅板價位cp值超高，麵衣偏厚但海鮮新鮮。位於奥武島，建議和貓咪一起享用</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">真材實料的銅板美食！海鮮天婦羅現點現炸，魚肉新鮮帶有天然海味。花枝Q嫩、蝦子鮮甜，沾點鹽或醬油就超美味！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-11">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_12.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',11)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">グルメ迴轉壽司市場（グルメ寿司 市场）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 鮪魚壽司、石垣牛壽司（限定！）、鮮蝦壽司、魽魚壽司、沖繩特產石斑魚（ヤイトハタ）。一盤從35元起！</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">北谷町美浜1-4-2</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-926-8839</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">11:00～21:00</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 高CP值在地人推薦！有免費停車場，只收現金不接受預約。用餐時段可能排隊，建議離峰時段前往</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">美國村老牌人氣壽司店！食材豐富新鮮，價格平實。石垣牛壽司是沖繩限定，魚肉超大超爽快，鮮甜美味！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-12">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_13.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',12)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">JEF Burger 苦瓜漢堡（JEFバーガー）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 苦瓜漢堡（招牌！苦瓜蛋夾牛肉）、炸薯條、冰紅茶。另有苦瓜三明治、炸苦瓜圈、苦瓜汁等特色料理</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">與那原町與那原3084｜各分店不同</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-945-1155</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">與那原店：24小時｜豐見城店：06:30-01:00｜坂田店：09:00-23:00</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 沖繩限定速食！堅持使用沖繩縣產食材。苦瓜經過處理不會太苦，搭配軟嫩煎蛋和漢堡肉，口感豐富有層次</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">別處吃不到的沖繩限定美食！山苦瓜是沖繩特產，加入漢堡後清爽不油膩，搭配酥脆薯條是完美早餐組合！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-13">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_14.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',13)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">海洋食堂（海鮮食堂）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 自製島豆腐（招牌！）、味噌煮豆腐、沖繩鹹豆花套餐、滷豬腳、什錦炒蔬菜、道地家常豆腐料理</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">那霸市曙1-3-23</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-861-6363</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">約11:00～20:00（以店家公告為準）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 1975年開業的老店，體驗道地沖繩家常料理。阿嬤級服務人員親切的服務讓人有回家的感覺。建議提前預約</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">想體驗沖繩在地人的日常飲食就來這！自製島豆腐綿密細緻，鹹豆花和台灣口味完全不同，鹹香濃郁超特別！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-14">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_15.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',14)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">Cafe薑黃花（カフェくるくま）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 薑黃花特製咖哩（招牌！可嚐到三種咖哩）、咖哩炸雞套餐、海鮮炒麵、泰式野菜春捲。烤雞軟嫩多汁超好吃！</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">南城市玉城玉城18-1（玉泉洞附近）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-948-4188</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">10:00～18:00（週二・週三公休）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 無敵海景餐廳！建議提前預約否則要排隊。室內有冷氣可以舒服賞海景。臨近沖繩世界文化王國・玉泉洞</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">日本第一泰式咖哩！正統南洋料理結合沖繩食材，咖哩香氣濃郁層次分明。坐在窗邊看著湛藍大海，美食美景雙重享受！</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-15">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_16.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',15)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">塔可飯咖啡 Kijimuna（タコライスカフェ キジムナ）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 墨西哥肉醬蛋包飯（Omutaco！招牌）、塔可飯、歐姆塔可飯。可以自由搭配選擇加歐姆蛋或起司</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">瀨長島店：豐見城市瀨長4-3｜各分店</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">098-851-2020</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">約10:00～20:00（各分店不同，請以店家公告為準）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 超人氣排隊店！分店在瀨長島、美國村、恩納、永旺夢樂城等都有。建議開店前到否則要等很久</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">將墨西哥塔可融合沖繩靈魂美食，滑嫩歐姆蛋覆蓋香濃肉醬飯，獨特性超高讓人一吃上癮！這是只有在沖繩才吃得到的創意美食</div></div></div></div>
+    </div>
+    <div class="modal-overlay" id="modal-restaurant-16">
+        <div class="modal"><div class="modal-img-wrap"><img class="modal-img" src="images/food_17.jpg" alt=""><button class="modal-close" onclick="closeModal('restaurant',16)">✕</button></div><div class="modal-body"><div class="modal-cat rest">🍖 餐廳</div><div class="modal-title">幸福鬆餅（幸せのパンケーキ）</div><div class="modal-sec"><div class="modal-sec-title">🍽️ 推薦菜色</div><div class="modal-sec-content">🔥 季節水果鬆餅（招牌！）、抹茶鬆餅、蜂蜜奶油鬆餅。蓬鬆像雲朵般入口即化！另有午餐鹹鬆餅可選</div></div><div class="modal-info-grid" style="margin-bottom:18px;"><div class="modal-info-box"><div class="label">📍 地址</div><div class="value">豐見城市瀨長4-1（Umikaji Terrace C-102）</div></div><div class="modal-info-box"><div class="label">📞 電話</div><div class="value">050-5444-5244</div></div></div><div class="modal-sec"><div class="modal-sec-title">🕐 營業時間</div><div class="modal-sec-content">11:00～20:00（六日到20:30）</div></div>
+<div class="modal-sec"><div class="modal-sec-title">⚠️ 注意事項</div><div class="modal-sec-content modal-caution">🚨 超人氣排隊名店！沒預約至少排隊1小時以上！建議用官方APP預約。位在瀨長島Umikaji Terrace商區，可以看飛機起降</div></div><div class="modal-sec"><div class="modal-sec-title">💡 好吃原因</div><div class="modal-sec-content modal-reason">超人氣厚鬆餅如空氣般鬆軟！季節水果配蜂蜜奶油，甜而不膩超幸福。搭配海景更是療癒，少女心大爆發！</div></div></div></div>
+    </div>
+
+
+    <script>
+    function showTab(tab) {
+        document.querySelectorAll('.modal-overlay.open').forEach(function(m){m.classList.remove('open')});
+        document.querySelectorAll('.gallery-section').forEach(function(s){s.classList.remove('active')});
+        document.querySelectorAll('.tab-btn').forEach(function(b){b.classList.remove('active')});
+        var el = document.getElementById(tab);
+        if (el) {
+            el.classList.add('active');
+            el.style.width = '100%';
+        }
+        var btn = document.getElementById('tab-' + tab);
+        if (btn) btn.classList.add('active');
+    }
+    function openModal(type, idx) {
+        var el = document.getElementById('modal-' + type + '-' + idx);
+        if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    }
+    function closeModal(type, idx) {
+        var el = document.getElementById('modal-' + type + '-' + idx);
+        if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
+    }
+    document.querySelectorAll('.modal-overlay').forEach(function(overlay) {
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) {
+                overlay.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+        });
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.open').forEach(function(m){m.classList.remove('open')});
+            document.body.style.overflow = '';
+        }
+    });
+    </script>
+</body>
+</html>
