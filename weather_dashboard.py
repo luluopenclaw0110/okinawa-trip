@@ -79,46 +79,75 @@ def get_weather_data(lat, lon):
 def get_taiwan_aqi(city_name):
     """從台灣環保署 AQI API 取得空氣品質資料"""
     try:
-        # 台灣環保署開放資料 AQI API
-        url = "https://data.moenv.gov.tw/apiv2/AQI/"
-        params = {
-            'scope': 'CWA',
-            'qid': '',
-            'oid': '',
-            'format': 'JSON',
-            'limit': '500',
-            'sort': 'ImportDate',
-            'dt': datetime.now().strftime('%Y-%m-%d')
+        # 台灣環保署開放資料 AQI API (需要 API key)
+        # 正確端點格式: https://data.moenv.gov.tw/api/v2/aqx_p_432
+        # 若無 API key，回傳 None 並在 UI 顯示提示
+        url = "https://data.moenv.gov.tw/api/v2/aqx_p_432"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+            'Accept': 'application/json'
         }
-        response = requests.get(url, params=params, timeout=10, verify=False)
+        params = {
+            'offset': '0',
+            'limit': '500'
+        }
+        
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        
+        # 檢查是否需要 API key
         if response.status_code == 200:
-            data = response.json()
-            records = data.get('records', [])
-            # 搜尋符合城市名稱的測站
-            for record in records:
-                if city_name in record.get('SiteName', '') or city_name in record.get('County', ''):
-                    return record
-            # 取第一筆（如果沒找到精確匹配）
-            if records:
-                return records[0]
+            text = response.text.strip()
+            if not text:
+                st.warning("⚠️ 台灣 AQI API 回傳空值，可能需要 API key")
+                return None
+            try:
+                data = response.json()
+                records = data.get('records', [])
+                if not records:
+                    st.warning("⚠️ AQI API 無資料回傳")
+                    return None
+                # 搜尋符合城市名稱的測站
+                for record in records:
+                    if city_name in record.get('SiteName', '') or city_name in record.get('County', ''):
+                        return record
+                # 取第一筆（如果沒找到精確匹配）
+                if records:
+                    return records[0]
+            except json.JSONDecodeError as je:
+                # API 回傳非 JSON 格式（可能是錯誤頁面）
+                st.warning(f"⚠️ AQI API 回傳非 JSON 格式: {str(je)[:50]}")
+                return None
+        else:
+            st.warning(f"⚠️ AQI API 連線失敗 (HTTP {response.status_code})，可能需要 API key")
+            return None
+            
+    except requests.exceptions.ConnectionError:
+        st.warning("⚠️ 無法連線到台灣 AQI API")
         return None
-    except requests.exceptions.SSLError:
-        st.warning("⚠️ AQI API SSL 憑證錯誤，跳過 AQI 資料")
+    except requests.exceptions.Timeout:
+        st.warning("⚠️ AQI API 連線逾時")
         return None
     except Exception as e:
-        st.error(f"台灣 AQI API 錯誤: {e}")
+        st.warning(f"⚠️ AQI 取得失敗: {str(e)[:100]}")
         return None
 
 
 def get_waqi_aqi(lat, lon):
     """從 WAQI API 取得空氣品質資料（國外用）"""
     try:
-        # WAQI free API - 使用地理座標查詢
-        # 注意：實際使用需要 API token，這裡使用公開端點
+        # WAQI API - 使用地理座標查詢
+        # 免費 token 可用於測試，但有流量限制
         url = f"https://api.waqi.info/feed/geo:{lat};{lon}/"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+        }
         params = {'token': 'demo'}  # 測試用 token，正式需申請
-        response = requests.get(url, params=params, timeout=10)
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        
         if response.status_code == 200:
+            text = response.text.strip()
+            if not text:
+                return None
             data = response.json()
             if data.get('status') == 'ok':
                 return data.get('data')
@@ -287,9 +316,14 @@ def render_weather_content(location_name, show_aqi, days_to_show, is_domestic=Tr
     aqi_data = None
     if show_aqi:
         if is_domestic:
-            # 台灣 AQI
+            # 台灣 AQI - 先嘗試 EPA API，失敗則用 WAQI
             city = TAIWAN_AQI_STATIONS.get(location_name, location_name)
             aqi_data = get_taiwan_aqi(city)
+            if aqi_data is None:
+                # EPA API 失敗時，使用 WAQI 作為備案
+                lat = ALL_LOCATIONS[location_name]['lat']
+                lon = ALL_LOCATIONS[location_name]['lon']
+                aqi_data = get_waqi_aqi(lat, lon)
         else:
             # 國外 WAQI AQI
             lat = ALL_LOCATIONS[location_name]['lat']
@@ -346,8 +380,9 @@ def render_weather_content(location_name, show_aqi, days_to_show, is_domestic=Tr
         if show_aqi and aqi_data:
             st.markdown("#### 🌬️ 空氣品質 (AQI)")
             
-            if is_domestic:
-                # 台灣 AQI 格式
+            # 檢測資料格式：EPA 使用 'AQI'，WAQI 使用 'aqi'
+            if isinstance(aqi_data, dict) and 'AQI' in aqi_data:
+                # 台灣 EPA AQI 格式
                 aqi_val = aqi_data.get('AQI', 'N/A')
                 pm25 = aqi_data.get('PM2.5', 'N/A')
                 pm10 = aqi_data.get('PM10', 'N/A')
@@ -364,24 +399,23 @@ def render_weather_content(location_name, show_aqi, days_to_show, is_domestic=Tr
                     st.metric("PM10", f"{pm10} μg/m³")
                 with aqi_cols[3]:
                     st.metric("O3", f"{o3} ppb")
-            else:
+            elif isinstance(aqi_data, dict):
                 # WAQI AQI 格式
-                if isinstance(aqi_data, dict):
-                    aqi_val = aqi_data.get('aqi', 'N/A')
-                    iaqi = aqi_data.get('iaqi', {})
-                    pm25 = iaqi.get('pm25', {}).get('v', 'N/A') if isinstance(iaqi, dict) else 'N/A'
-                    pm10 = iaqi.get('pm10', {}).get('v', 'N/A') if isinstance(iaqi, dict) else 'N/A'
-                    status, emoji, color = get_aqi_status(aqi_val)
-                    
-                    aqi_cols = st.columns(4)
-                    with aqi_cols[0]:
-                        st.metric("AQI 指數", f"{emoji} {status}", f"AQI: {aqi_val}")
-                    with aqi_cols[1]:
-                        st.metric("PM2.5", f"{pm25} μg/m³")
-                    with aqi_cols[2]:
-                        st.metric("PM10", f"{pm10} μg/m³")
-                    with aqi_cols[3]:
-                        st.metric("資料來源", "WAQI")
+                aqi_val = aqi_data.get('aqi', 'N/A')
+                iaqi = aqi_data.get('iaqi', {})
+                pm25 = iaqi.get('pm25', {}).get('v', 'N/A') if isinstance(iaqi, dict) else 'N/A'
+                pm10 = iaqi.get('pm10', {}).get('v', 'N/A') if isinstance(iaqi, dict) else 'N/A'
+                status, emoji, color = get_aqi_status(aqi_val)
+                
+                aqi_cols = st.columns(4)
+                with aqi_cols[0]:
+                    st.metric("AQI 指數", f"{emoji} {status}", f"AQI: {aqi_val}")
+                with aqi_cols[1]:
+                    st.metric("PM2.5", f"{pm25} μg/m³")
+                with aqi_cols[2]:
+                    st.metric("PM10", f"{pm10} μg/m³")
+                with aqi_cols[3]:
+                    st.metric("資料來源", "WAQI")
         
         # ===== 溫度趨勢圖 =====
         st.markdown("### 📈 溫度趨勢")
@@ -502,7 +536,7 @@ def render_weather_content(location_name, show_aqi, days_to_show, is_domestic=Tr
         
         # AQI 建議
         if show_aqi and aqi_data:
-            if is_domestic:
+            if isinstance(aqi_data, dict) and 'AQI' in aqi_data:
                 aqi_val = aqi_data.get('AQI', 'N/A')
             else:
                 aqi_val = aqi_data.get('aqi', 'N/A') if isinstance(aqi_data, dict) else 'N/A'
