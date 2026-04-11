@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>美ら海水族館｜南海樂園・沖繩</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .spot-info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin: 40px 0;
+    }
+    .info-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      transition: var(--transition);
+      border-left: 4px solid var(--secondary);
+    }
+    .info-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow);
+    }
+    .info-card .label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--primary);
+      opacity: 0.7;
+    }
+    .info-card .value {
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: var(--text);
+      line-height: 1.5;
+    }
+    .spot-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 40px 0;
+      border-top: 1px solid rgba(0,119,182,0.1);
+      margin-top: 40px;
+    }
+    .spot-nav a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: var(--transition);
+    }
+    .spot-nav .prev-btn {
+      background: var(--light-bg);
+      color: var(--primary);
+    }
+    .spot-nav .prev-btn:hover {
+      background: var(--primary);
+      color: var(--white);
+    }
+    .spot-nav .next-btn {
+      background: var(--secondary);
+      color: var(--white);
+    }
+    .spot-nav .next-btn:hover {
+      background: var(--secondary-light);
+      transform: translateY(-2px);
+    }
+    .spot-nav .placeholder {
+      visibility: hidden;
+    }
+    .spot-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      background: var(--light-bg);
+      color: var(--primary);
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: var(--transition);
+      margin-bottom: 32px;
+    }
+    .spot-back:hover {
+      background: var(--primary);
+      color: var(--white);
+    }
+    @media (max-width: 600px) {
+      .spot-info-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <div class="container">
+    <a href="../index.html" class="nav-logo">🌊 <span>南海樂園</span>・沖繩</a>
+    <ul class="nav-links">
+      <li><a href="../index.html">首頁</a></li>
+      <li><a href="../spots.html" class="active">景點推薦</a></li>
+      <li><a href="../restaurants.html">美食餐廳</a></li>
+    </ul>
+    <div class="hamburger" aria-label="選單">
+      <span></span><span></span><span></span>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu">
+  <div class="mobile-menu-panel">
+    <button class="menu-close" aria-label="關閉">✕</button>
+    <ul>
+      <li><a href="../index.html">首頁</a></li>
+      <li><a href="../spots.html">景點推薦</a></li>
+      <li><a href="../restaurants.html">美食餐廳</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- Hero -->
+<div class="spot-hero">
+  <img src="../images/spots/spot_01.jpg" alt="美ら海水族館" onerror="this.src='https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=1600&q=80'">
+  <div class="spot-hero-overlay"></div>
+  <div class="spot-hero-content container">
+    <div class="spot-number">景點 01</div>
+    <h1>美ら海水族館</h1>
+    <p>走進黑潮的奇幻國度，與鯨鯊共游的夢幻體驗</p>
+  </div>
+</div>
+
+<!-- Content -->
+<main class="container spot-detail">
+  <a href="../spots.html" class="spot-back">← 返回景點推薦</a>
+
+  <div class="spot-content" style="max-width:900px; padding:40px 0;">
+    <p style="font-size:1.15rem; line-height:2.2; color:var(--text); margin-bottom:32px;">
+      佇立於本部半島蔚藍海岸線上的<strong style="color:var(--primary)">美ら海水族館</strong>，是每一位來到沖繩的旅人心中必訪的夢幻聖地。走進館內，世界最大級的「黑潮之海」巨型水槽隨即映入眼眼簾，鯨鯊緩緩游過的龐然身影搭配滿場發光的鬼蝠魟，壯闘程度令人屏息。館內更設有神秘深海生物區與互動體驗區，從幼童到長者都能在此找到驚喜。建議趕在上午九點開門第一時間入館，避開人潮悠閒遊覽，幸運的話還能遇見餵食解說。遊覽完畢，不妨漫步至一旁的海洋紀念公園海灘，讓這片清澈見底的翡翠綠海水為旅程畫上完美句點。
+    </p>
+
+    <!-- Info Cards -->
+    <div class="spot-info-grid">
+      <div class="info-card">
+        <div class="label">📍 地址</div>
+        <div class="value">沖繩縣國頭郡本部町字備頁崎 424</div>
+      </div>
+      <div class="info-card">
+        <div class="label">🎟️ 門票</div>
+        <div class="value">大人 1,880 日圓／高中生 1,250 日圓／國中生以下免費</div>
+      </div>
+      <div class="info-card">
+        <div class="label">🚌 交通</div>
+        <div class="value">那霸巴士站搭高速巴士 111 號約 2 小時，於「美ら海水族館前」站牌直達</div>
+      </div>
+      <div class="info-card">
+        <div class="label">🌿 最佳季節</div>
+        <div class="value">全年皆宜，建議早上開園即入館</div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="spot-nav">
+      <a href="../spots.html" class="prev-btn placeholder">← 上一個</a>
+      <a href="spot-02.html" class="next-btn">首里城公園 →</a>
+    </div>
+  </div>
+</main>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>🌊 <span>南海樂園</span>・沖繩</h3>
+        <p>探索琉球王國的藍色奇幻，展開一生必訪的南方旅程。</p>
+      </div>
+      <div class="footer-links">
+        <h4>快速連結</h4>
+        <ul>
+          <li><a href="../spots.html">景點推薦</a></li>
+          <li><a href="../restaurants.html">美食餐廳</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>資源</h4>
+        <ul>
+          <li><a href="#">旅遊攻略</a></li>
+          <li><a href="#">交通指南</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 南海樂園・沖繩｜文字編輯：文字編輯高手</p>
+    </div>
+  </div>
+</footer>
+
+<script src="../js/main.js"></script>
+</body>
+</html>

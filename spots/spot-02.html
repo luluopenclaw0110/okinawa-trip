@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>首里城公園｜南海樂園・沖繩</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700;900&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .spot-info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin: 40px 0; }
+    .info-card { background: var(--white); border-radius: var(--radius); padding: 20px 24px; box-shadow: var(--shadow-sm); border-left: 4px solid var(--secondary); }
+    .info-card .label { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--primary); opacity: 0.7; }
+    .info-card .value { font-size: 0.95rem; font-weight: 500; color: var(--text); line-height: 1.5; }
+    .spot-nav { display: flex; justify-content: space-between; padding: 40px 0; border-top: 1px solid rgba(0,119,182,0.1); margin-top: 40px; }
+    .spot-nav a { display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; border-radius: 50px; font-weight: 600; font-size: 0.9rem; transition: var(--transition); }
+    .spot-nav .prev-btn { background: var(--light-bg); color: var(--primary); }
+    .spot-nav .next-btn { background: var(--secondary); color: var(--white); }
+    .spot-nav .placeholder { visibility: hidden; }
+    .spot-back { display: inline-flex; align-items: center; gap: 6px; padding: 10px 20px; background: var(--light-bg); color: var(--primary); border-radius: 50px; font-weight: 600; font-size: 0.9rem; margin-bottom: 32px; }
+    @media (max-width: 600px) { .spot-info-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<nav class="navbar"><div class="container"><a href="../index.html" class="nav-logo">🌊 <span>南海樂園</span>・沖繩</a><ul class="nav-links"><li><a href="../index.html">首頁</a></li><li><a href="../spots.html" class="active">景點推薦</a></li><li><a href="../restaurants.html">美食餐廳</a></li></ul><div class="hamburger"><span></span><span></span><span></span></div></div></nav>
+<div class="mobile-menu"><div class="mobile-menu-panel"><button class="menu-close">✕</button><ul><li><a href="../index.html">首頁</a></li><li><a href="../spots.html">景點推薦</a></li><li><a href="../restaurants.html">美食餐廳</a></li></ul></div></div>
+<div class="spot-hero"><img src="../images/spots/spot_02.jpg" alt="首里城公園"><div class="spot-hero-overlay"></div><div class="spot-hero-content container"><div class="spot-number">景點 02</div><h1>首里城公園</h1><p>琉球王國的榮耀印記，UNESCO世界文化遺產</p></div></div>
+<main class="container spot-detail"><a href="../spots.html" class="spot-back">← 返回景點推薦</a><div class="spot-content" style="max-width:900px; padding:40px 0;"><p style="font-size:1.15rem; line-height:2.2; color:var(--text); margin-bottom:32px;">首里城公園坐落於那霸市的高台上，朱紅色的城門與斜射的木造結構，處處散發著融合中國、日本與琉球文化於一身的獨特魅力。作為琉球王國的政治心臟，這座古城於2000年登錄為UNESCO世界文化遺產，即便正殿因2019年祝融之災正在積極重建中，「見せる復興」的精神依然感動無數旅人。沿著石板步道拾級而上，穿過熱鬧的街道、神秘的龍潭，俯瞰那霸市景與遠方遼闘海景交相輝映。春季舉辦的「新春の宴」與秋季的夜間點燈活動，更賦予這座古城四季不同的風情。</p><div class="spot-info-grid"><div class="info-card"><div class="label">📍 地址</div><div class="value">沖繩縣那霸市首里金城町1-2</div></div><div class="info-card"><div class="label">🎟️ 門票</div><div class="value">免費（正殿區域大人470日圓）</div></div><div class="info-card"><div class="label">🚌 交通</div><div class="value">沖繩都市單軌電車「首里站」步行約15分鐘</div></div><div class="info-card"><div class="label">🌿 最佳季節</div><div class="value">4-6月、10-11月</div></div></div><div class="spot-nav"><a href="spot-01.html" class="prev-btn">← 美ら海水族館</a><a href="spot-03.html" class="next-btn">萬座毛 →</a></div></div></main>
+<footer class="footer"><div class="container"><div class="footer-inner"><div class="footer-brand"><h3>🌊 <span>南海樂園</span>・沖繩</h3><p>探索琉球王國的藍色奇幻，展開一生必訪的南方旅程。</p></div><div class="footer-links"><h4>快速連結</h4><ul><li><a href="../spots.html">景點推薦</a></li><li><a href="../restaurants.html">美食餐廳</a></li></ul></div></div><div class="footer-bottom"><p>© 2026 南海樂園・沖繩｜文字編輯：文字編輯高手</p></div></div></footer>
+<script src="../js/main.js"></script></body></html>

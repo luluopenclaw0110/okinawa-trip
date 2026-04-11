@@ -1,0 +1,1025 @@
+#!/usr/bin/env python3
+"""
+少爺專用 - 專業天氣儀表板 V3 ✨
+使用方式: streamlit run weather_dashboard.py
+"""
+
+import streamlit as st
+import plotly.graph_objects as go
+import subprocess
+import json
+import requests
+from datetime import datetime, timedelta
+from zoneinfo import ZoneInfo
+
+# 頁面設定
+st.set_page_config(
+    page_title="少爺的天氣儀表板 🌤️",
+    page_icon="🌤️",
+    layout="wide"
+)
+
+# ===== 自訂 CSS：Glassmorphism + Pill Tabs + 動畫 =====
+st.markdown("""
+<style>
+    /* ── 全域字型與背景 ── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
+
+    :root {
+        --bg-start: #0f0c29;
+        --bg-mid:   #302b63;
+        --bg-end:   #24243e;
+        --glass-bg: rgba(255, 255, 255, 0.08);
+        --glass-border: rgba(255, 255, 255, 0.18);
+        --accent: #6C63FF;
+        --text-primary: #ffffff;
+        --text-muted: rgba(255,255,255,0.6);
+    }
+
+    html, body, .stApp {
+        background: linear-gradient(135deg, var(--bg-start) 0%, var(--bg-mid) 50%, var(--bg-end) 100%) !important;
+        font-family: 'Inter', 'PingFang TC', sans-serif !important;
+        color: var(--text-primary) !important;
+        min-height: 100vh;
+    }
+
+    /* ── 頂部抬頭 ── */
+    .hero-title {
+        text-align: center;
+        padding: 1.5rem 0 0.5rem;
+    }
+    .hero-title h1 {
+        font-size: 2.4rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #a78bfa, #38bdf8, #f472b6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 0;
+        letter-spacing: -0.5px;
+    }
+    .hero-title .subtitle {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        margin-top: 4px;
+    }
+
+    /* ── 膠囊導航列 (Pill Tabs) ── */
+    .pill-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin: 1.2rem 0;
+    }
+    .pill-tab {
+        padding: 8px 28px;
+        border-radius: 50px;
+        border: 1.5px solid var(--glass-border);
+        background: var(--glass-bg);
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        text-decoration: none;
+        user-select: none;
+    }
+    .pill-tab:hover {
+        background: rgba(255,255,255,0.15);
+        color: #fff;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 20px rgba(108,99,255,0.3);
+    }
+    .pill-tab.active {
+        background: linear-gradient(135deg, #6C63FF, #a78bfa);
+        border-color: transparent;
+        color: #fff;
+        box-shadow: 0 4px 24px rgba(108,99,255,0.5);
+        transform: translateY(-2px);
+    }
+
+    /* ── Glass Card ── */
+    .glass-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .glass-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ── 主天氣 Hero 卡片 ── */
+    .weather-hero {
+        text-align: center;
+        padding: 2rem;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 28px;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        box-shadow: 0 12px 48px rgba(0,0,0,0.35);
+        margin-bottom: 1.5rem;
+    }
+    .weather-hero .big-emoji {
+        font-size: 6rem;
+        line-height: 1;
+        animation: float 3s ease-in-out infinite;
+        filter: drop-shadow(0 8px 20px rgba(0,0,0,0.3));
+    }
+    .weather-hero .temp-display {
+        font-size: 4rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #fde68a, #fb923c);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+        margin: 0.5rem 0;
+    }
+    .weather-hero .desc-text {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.85);
+    }
+    .weather-hero .temp-range {
+        font-size: 1.1rem;
+        color: var(--text-muted);
+        margin-top: 0.3rem;
+    }
+
+    /* ── 浮動動畫 ── */
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+
+    /* ── 天氣預報小卡片 ── */
+    .forecast-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 1.5rem;
+    }
+    .fc-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 18px;
+        padding: 1.2rem 1rem;
+        text-align: center;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        transition: transform 0.3s ease;
+    }
+    .fc-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 28px rgba(0,0,0,0.3);
+    }
+    .fc-card .fc-emoji {
+        font-size: 2.8rem;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+    .fc-card .fc-day {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .fc-card .fc-temp {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #fde68a;
+        margin: 0.3rem 0;
+    }
+    .fc-card .fc-rain {
+        font-size: 0.85rem;
+        color: #7dd3fc;
+    }
+
+    /* ── 數據指標卡 (Info Cards) ── */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 1.5rem;
+    }
+    @media (max-width: 900px) {
+        .info-grid { grid-template-columns: repeat(2, 1fr); }
+        .forecast-row { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    }
+    @media (max-width: 600px) {
+        .info-grid { grid-template-columns: repeat(2, 1fr); }
+        .forecast-row { grid-template-columns: 1fr; gap: 8px; }
+    }
+    .info-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 16px;
+        padding: 1rem;
+        text-align: center;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+    .info-card .info-emoji { font-size: 1.8rem; margin-bottom: 0.3rem; }
+    .info-card .info-label {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+    .info-card .info-value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+        margin: 0.2rem 0;
+    }
+    .info-card .info-sub {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+    }
+
+    /* ── AQI 彩虹進度條 ── */
+    .aqi-section {
+        margin-bottom: 1.5rem;
+    }
+    .aqi-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 0.8rem;
+    }
+    .aqi-badge {
+        background: linear-gradient(135deg, #6C63FF, #a78bfa);
+        border-radius: 50px;
+        padding: 4px 18px;
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: white;
+        white-space: nowrap;
+    }
+    .aqi-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.9);
+    }
+    .aqi-status-text {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+    .rainbow-bar-container {
+        background: rgba(255,255,255,0.1);
+        border-radius: 50px;
+        height: 18px;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 0.5rem;
+    }
+    .rainbow-bar {
+        height: 100%;
+        border-radius: 50px;
+        background: linear-gradient(to right,
+            #00e400 0%, #00e400 16.6%,
+            #ffff00 16.6%, #ff7e00 33.3%,
+            #ff0000 33.3%, #ff7e00 50%,
+            #8000ff 50%, #8h00ff 66.6%,
+            #805000 66.6%, #ff0000 83.3%,
+            #7e0023 83.3%, #7e0023 100%
+        );
+        background: linear-gradient(to right,
+            #00e400 0%, #00e400 20%,
+            #ffff00 20%, #ff7e00 40%,
+            #ff0000 40%, #ff7e00 60%,
+            #8b5cf6 60%, #8b5cf6 80%,
+            #7e0023 80%, #7e0023 100%
+        );
+        position: relative;
+        transition: width 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .rainbow-bar::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: inherit;
+        filter: blur(4px);
+        opacity: 0.5;
+    }
+    .aqi-marker {
+        position: absolute;
+        top: -4px;
+        width: 4px;
+        height: 26px;
+        background: white;
+        border-radius: 2px;
+        box-shadow: 0 0 8px rgba(255,255,255,0.8);
+        transition: left 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .aqi-labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        font-weight: 600;
+        padding: 0 2px;
+    }
+    .aqi-detail-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+        margin-top: 0.8rem;
+    }
+    @media (max-width: 600px) {
+        .aqi-detail-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    .aqi-detail-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: 12px;
+        padding: 0.8rem;
+        text-align: center;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .aqi-detail-card .ad-label {
+        font-size: 0.7rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .aqi-detail-card .ad-value {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #fff;
+        margin-top: 2px;
+    }
+
+    /* ── 建議卡片 ── */
+    .suggestions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        margin-bottom: 1.5rem;
+    }
+    .sugg-card {
+        border-radius: 14px;
+        padding: 0.9rem 1.1rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+    }
+    .sugg-card.good {
+        background: rgba(34, 197, 94, 0.15);
+        border: 1px solid rgba(34, 197, 94, 0.4);
+        color: #86efac;
+    }
+    .sugg-card.warn {
+        background: rgba(251, 191, 36, 0.15);
+        border: 1px solid rgba(251, 191, 36, 0.4);
+        color: #fde68a;
+    }
+    .sugg-card.danger {
+        background: rgba(248, 113, 113, 0.15);
+        border: 1px solid rgba(248, 113, 113, 0.4);
+        color: #fca5a5;
+    }
+    .sugg-card .sugg-emoji { font-size: 1.4rem; }
+
+    /* ── 側邊欄美化 ── */
+    .stSidebar {
+        background: rgba(15, 12, 41, 0.7) !important;
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-right: 1px solid var(--glass-border);
+    }
+    .stSidebar .stSelectbox label,
+    .stSidebar .stSlider label,
+    .stSidebar .stCheckbox label {
+        color: rgba(255,255,255,0.7) !important;
+    }
+
+    /* ── Streamlit 原生元素覆寫 ── */
+    .stSelectbox > div > div {
+        background: rgba(255,255,255,0.08) !important;
+        border-radius: 12px !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        color: white !important;
+    }
+    .stSlider > div > div > div {
+        background: rgba(255,255,255,0.1) !important;
+    }
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background: transparent;
+    }
+    .stTabs [data-baseweb="tab"] {
+        border-radius: 50px !important;
+        background: rgba(255,255,255,0.06) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: rgba(255,255,255,0.6) !important;
+        padding: 6px 20px !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+    }
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #6C63FF, #a78bfa) !important;
+        border-color: transparent !important;
+        color: white !important;
+        box-shadow: 0 4px 16px rgba(108,99,255,0.4) !important;
+    }
+
+    /* ── Plotly 圖表美化 ── */
+    .js-plotly-plot .plotly .modebar { opacity: 0.3; }
+
+    /* ── 淡入動畫 ── */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .fade-in { animation: fadeInUp 0.6s ease forwards; }
+    .fade-in-delay-1 { animation: fadeInUp 0.6s 0.1s ease forwards; opacity: 0; }
+    .fade-in-delay-2 { animation: fadeInUp 0.6s 0.2s ease forwards; opacity: 0; }
+    .fade-in-delay-3 { animation: fadeInUp 0.6s 0.3s ease forwards; opacity: 0; }
+
+    /* ── 報告時間 ── */
+    .report-time {
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+
+    /* ── Footer ── */
+    .footer {
+        text-align: center;
+        color: rgba(255,255,255,0.3);
+        font-size: 0.75rem;
+        padding: 1.5rem 0 0.5rem;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        margin-top: 1rem;
+    }
+
+    /* ── 隱藏預設元素的技巧 ── */
+    .starkdown hr { display: none; }
+    section[data-testid="stSidebar"] { border-right: none; }
+</style>
+""", unsafe_allow_html=True)
+
+# ===== 地點設定 =====
+TAIWAN_LOCATIONS = {
+    '新竹寶山': {'lat': 24.75, 'lon': 121.05},
+    '苗栗': {'lat': 24.560, 'lon': 120.821},
+    '台中南屯': {'lat': 24.125, 'lon': 120.625},
+    '沙鹿': {'lat': 24.257, 'lon': 120.566},
+    '龍井': {'lat': 24.192, 'lon': 120.545},
+    '彰化': {'lat': 24.081, 'lon': 120.562},
+    '埔里': {'lat': 23.968, 'lon': 120.967},
+    '日月潭': {'lat': 23.881, 'lon': 120.908},
+}
+
+JAPAN_LOCATIONS = {
+    '東京': {'lat': 35.676, 'lon': 139.650},
+    '名古屋': {'lat': 35.181, 'lon': 136.906},
+    '大阪': {'lat': 34.693, 'lon': 135.502},
+    '京都': {'lat': 35.011, 'lon': 135.768},
+    '沖繩_系滿': {'lat': 26.255, 'lon': 127.702},
+    '沖繩_豐見': {'lat': 26.168, 'lon': 127.683},
+    '沖繩_那霸': {'lat': 26.212, 'lon': 127.681},
+    '沖繩_恩納': {'lat': 26.591, 'lon': 127.862},
+    '沖繩_名護': {'lat': 26.591, 'lon': 127.978},
+}
+
+ALL_LOCATIONS = {**TAIWAN_LOCATIONS, **JAPAN_LOCATIONS}
+TAIWAN_AQI_STATIONS = {
+    '新竹寶山': '新竹市', '苗栗': '苗栗', '台中南屯': '台中',
+    '沙鹿': '沙鹿', '龍井': '龍井', '彰化': '彰化', '埔里': '埔里', '日月潭': '日月潭',
+}
+DEFAULT_LOCATION = '台中南屯'
+
+
+# ===== API 函式 =====
+def get_weather_data(lat, lon):
+    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m,relative_humidity_2m,precipitation_probability,wind_speed_10m,weather_code,apparent_temperature&daily=temperature_2m_max,temperature_2m_min,precipitation_probability_max&timezone=Asia/Taipei&forecast_days=3"
+    try:
+        result = subprocess.run(['curl', '-s', url], capture_output=True, text=True, timeout=10)
+        return json.loads(result.stdout)
+    except Exception as e:
+        return None
+
+def get_taiwan_aqi(city_name):
+    try:
+        url = "https://data.moenv.gov.tw/api/v2/aqx_p_432"
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+            'Accept': 'application/json',
+            'Authorization': 'a75a9b46-160f-4724-b3a1-446633472310'
+        }
+        params = {'offset': '0', 'limit': '500'}
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        if response.status_code == 200:
+            text = response.text.strip()
+            if not text: return None
+            try:
+                data = response.json()
+                records = data.get('records', [])
+                if not records: return None
+                for record in records:
+                    if city_name in record.get('SiteName', '') or city_name in record.get('County', ''):
+                        return record
+                return records[0] if records else None
+            except json.JSONDecodeError:
+                return None
+    except: return None
+
+def get_waqi_aqi(lat, lon):
+    try:
+        url = f"https://api.waqi.info/feed/geo:{lat};{lon}/"
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        params = {'token': 'f67a217b6e937a17498b19a39261aa9c90c6bbda'}
+        response = requests.get(url, params=params, headers=headers, timeout=10)
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('status') == 'ok':
+                return data.get('data')
+        return None
+    except: return None
+
+def get_aqi_status(aqi):
+    try:
+        aqi_val = int(aqi) if aqi else None
+        if aqi_val is None: return '未知', '⚪', 'gray', 0
+        if aqi_val <= 50:   return '良好', '🟢', '#00e400', aqi_val
+        elif aqi_val <= 100: return '中等', '🟡', '#ffff00', aqi_val
+        elif aqi_val <= 150: return '對敏感族群不健康', '🟠', '#ff7e00', aqi_val
+        elif aqi_val <= 200: return '不健康', '🔴', '#ff0000', aqi_val
+        elif aqi_val <= 300: return '非常不健康', '🟣', '#8b5cf6', aqi_val
+        else:                return '危害', '❤️‍🔥', '#7e0023', aqi_val
+    except:
+        return '未知', '⚪', 'gray', 0
+
+def get_weather_icon(code):
+    icons = {
+        0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️',
+        45: '🌫️', 48: '🌫️',
+        51: '🌧️', 53: '🌧️', 55: '🌧️',
+        61: '🌧️', 63: '🌧️', 65: '🌧️',
+        71: '🌨️', 73: '🌨️', 75: '🌨️',
+        80: '🌦️', 81: '🌦️', 82: '🌦️',
+        95: '⛈️', 96: '⛈️', 99: '⛈️'
+    }
+    return icons.get(code, '🌡️')
+
+def get_weather_desc(code):
+    codes = {
+        0: '晴朗', 1: '晴時多雲', 2: '多雲', 3: '陰天',
+        45: '霧', 48: '霧',
+        51: '小雨', 53: '小雨', 55: '小雨',
+        61: '小雨', 63: '中雨', 65: '大雨',
+        71: '小雪', 73: '中雪', 75: '大雪',
+        80: '小陣雨', 81: '中陣雨', 82: '大陣雨',
+        95: '雷陣雨', 96: '雷陣雨', 99: '強雷雨'
+    }
+    return codes.get(code, '未知')
+
+def get_wind_level(speed):
+    if speed < 1:   return '無風'
+    elif speed < 6:  return '輕風'
+    elif speed < 12: return '微風'
+    elif speed < 20: return '和風'
+    elif speed < 29: return '清風'
+    elif speed < 39: return '強風'
+    elif speed < 50: return '疾風'
+    elif speed < 62: return '大風'
+    else:            return '颶風'
+
+def get_wind_emoji(speed):
+    if speed < 6:   return '🍃'
+    elif speed < 20: return '🌬️'
+    elif speed < 39: return '💨'
+    else:            return '🌀'
+
+
+# ===== AQI 彩虹進度條 HTML =====
+def render_aqi_bar(aqi_val, aqi_max=300):
+    pct = min(aqi_val / aqi_max * 100, 100)
+    status, emoji, color, _ = get_aqi_status(aqi_val)
+    marker_left = pct
+    return f"""
+    <div class="aqi-section">
+        <div class="aqi-header">
+            <span class="aqi-badge">{emoji} AQI {aqi_val}</span>
+            <span class="aqi-title">空氣品質</span>
+            <span class="aqi-status-text">— {status}</span>
+        </div>
+        <div class="rainbow-bar-container">
+            <div class="rainbow-bar" style="width: {pct}%"></div>
+            <div class="aqi-marker" style="left: {marker_left}%"></div>
+        </div>
+        <div class="aqi-labels">
+            <span>0</span><span>50</span><span>100</span><span>150</span><span>200</span><span>300</span>
+        </div>
+    </div>
+    """
+
+# ===== 主程式 =====
+def main():
+    VERSION = "3.0"
+
+    # ── 初始化 session_state ──
+    if 'current_tab' not in st.session_state:
+        st.session_state.current_tab = "domestic"
+    if 'domestic_location' not in st.session_state:
+        st.session_state.domestic_location = DEFAULT_LOCATION
+    if 'international_location' not in st.session_state:
+        st.session_state.international_location = list(JAPAN_LOCATIONS.keys())[0]
+    if 'selected_region' not in st.session_state:
+        st.session_state.selected_region = "domestic"
+
+    now_str = datetime.now(ZoneInfo('Asia/Taipei')).strftime('%Y年%m月%d日 %H:%M')
+
+    # ── 側邊欄 ──
+    with st.sidebar:
+        st.markdown("### 🌤️ 少爺的天氣")
+        st.markdown(f"**V{VERSION}** | {datetime.now(ZoneInfo('Asia/Taipei')).strftime('%Y-%m-%d')}")
+        st.markdown("---")
+
+        # 區域切換（按鈕樣式）
+        st.markdown("### 🗺️ 選擇區域")
+        col_dom, col_jpn = st.columns(2)
+        with col_dom:
+            if st.button("🇹🇼 國內", use_container_width=True,
+                         type="primary" if st.session_state.selected_region == "domestic" else "secondary"):
+                st.session_state.selected_region = "domestic"
+                st.rerun()
+        with col_jpn:
+            if st.button("🇯🇵 日本", use_container_width=True,
+                         type="primary" if st.session_state.selected_region == "international" else "secondary"):
+                st.session_state.selected_region = "international"
+                st.rerun()
+
+        st.markdown("---")
+
+        if st.session_state.selected_region == "domestic":
+            selected_location = st.selectbox(
+                "📍 選擇地點（台灣）",
+                list(TAIWAN_LOCATIONS.keys()),
+                index=list(TAIWAN_LOCATIONS.keys()).index(st.session_state.domestic_location)
+                if st.session_state.domestic_location in TAIWAN_LOCATIONS else 0
+            )
+            st.session_state.domestic_location = selected_location
+        else:
+            selected_location = st.selectbox(
+                "📍 選擇地點（日本）",
+                list(JAPAN_LOCATIONS.keys()),
+                index=list(JAPAN_LOCATIONS.keys()).index(st.session_state.international_location)
+                if st.session_state.international_location in JAPAN_LOCATIONS else 0
+            )
+            st.session_state.international_location = selected_location
+
+        days_to_show = st.slider("📅 顯示天數", 1, 3, 2)
+        show_aqi = st.checkbox("🌬️ 顯示空氣品質", value=True)
+        show_charts = st.checkbox("📈 顯示圖表", value=True)
+
+        st.markdown("---")
+        st.markdown("**📊 資料來源**")
+        st.caption("- Open-Meteo（天氣）")
+        st.caption("- 環保署 / WAQI（AQI）")
+
+    is_domestic = selected_location in TAIWAN_LOCATIONS
+
+    # ── 頂部抬頭 ──
+    st.markdown(f"""
+    <div class="hero-title">
+        <h1>🌦️ {selected_location} 天氣預報</h1>
+        <div class="subtitle">⏰ 報告時間：{now_str} &nbsp;|&nbsp; V{VERSION} ✨</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── 取得資料 ──
+    data = get_weather_data(
+        ALL_LOCATIONS[selected_location]['lat'],
+        ALL_LOCATIONS[selected_location]['lon']
+    )
+
+    # AQI
+    aqi_data = None
+    if show_aqi:
+        if is_domestic:
+            city = TAIWAN_AQI_STATIONS.get(selected_location, selected_location)
+            aqi_data = get_taiwan_aqi(city)
+            if aqi_data is None:
+                lat, lon = ALL_LOCATIONS[selected_location]['lat'], ALL_LOCATIONS[selected_location]['lon']
+                aqi_data = get_waqi_aqi(lat, lon)
+        else:
+            lat, lon = ALL_LOCATIONS[selected_location]['lat'], ALL_LOCATIONS[selected_location]['lon']
+            aqi_data = get_waqi_aqi(lat, lon)
+
+    if data:
+        hourly = data['hourly']
+        daily = data['daily']
+
+        # ── 今日概覽 ──
+        today_max    = daily['temperature_2m_max'][0]
+        today_min    = daily['temperature_2m_min'][0]
+        today_rain   = daily['precipitation_probability_max'][0]
+        today_code   = hourly['weather_code'][0]
+        today_icon   = get_weather_icon(today_code)
+        today_desc   = get_weather_desc(today_code)
+        today_feels  = hourly['apparent_temperature'][0]
+        today_humid  = hourly['relative_humidity_2m'][0]
+        today_wind   = hourly['wind_speed_10m'][0]
+
+        # 明天
+        tomorrow_max  = daily['temperature_2m_max'][1]
+        tomorrow_min  = daily['temperature_2m_min'][1]
+        tomorrow_rain = daily['precipitation_probability_max'][1]
+        tomorrow_code = hourly['weather_code'][24]
+        tomorrow_icon = get_weather_icon(tomorrow_code)
+        tomorrow_desc = get_weather_desc(tomorrow_code)
+
+        # 後天
+        day3_max  = daily['temperature_2m_max'][2] if len(daily['temperature_2m_max']) > 2 else None
+        day3_min  = daily['temperature_2m_min'][2] if len(daily['temperature_2m_min']) > 2 else None
+        day3_rain = daily['precipitation_probability_max'][2] if len(daily['precipitation_probability_max']) > 2 else None
+        day3_code = hourly['weather_code'][48] if len(hourly['weather_code']) > 48 else 0
+        day3_icon = get_weather_icon(day3_code)
+        day3_desc = get_weather_desc(day3_code)
+
+        avg_wind = int(sum(hourly['wind_speed_10m'][:24]) / 24)
+
+        # ── 主天氣 Hero 卡片 ──
+        st.markdown(f"""
+        <div class="weather-hero fade-in">
+            <div class="big-emoji">{today_icon}</div>
+            <div class="temp-display">{today_max:.0f}°</div>
+            <div class="desc-text">{today_desc}</div>
+            <div class="temp-range">體感 {today_feels:.0f}° · 今 {today_min:.0f}° / 明 {tomorrow_min:.0f}°</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # ── 三日預報卡片 ──
+        day_labels = ['今天', '明天', '後天']
+        day_icons  = [today_icon, tomorrow_icon, day3_icon]
+        day_descs   = [today_desc, tomorrow_desc, day3_desc]
+        day_maxs    = [today_max, tomorrow_max, day3_max]
+        day_mins    = [today_min, tomorrow_min, day3_min]
+        day_rains   = [today_rain, tomorrow_rain, day3_rain]
+
+        fc_html = '<div class="forecast-row">'
+        for i in range(3):
+            if day_maxs[i] is not None:
+                rain_emoji = "☂️" if day_rains[i] and day_rains[i] > 50 else ("🌂" if day_rains[i] else "☀️")
+                fc_html += f"""
+                <div class="fc-card fade-in-delay-{i+1}">
+                    <span class="fc-emoji">{day_icons[i]}</span>
+                    <div class="fc-day">{day_labels[i]}</div>
+                    <div class="fc-temp">{day_mins[i]:.0f}° ~ {day_maxs[i]:.0f}°</div>
+                    <div class="fc-rain">{rain_emoji} {day_rains[i] if day_rains[i] else 0}%</div>
+                </div>"""
+        fc_html += '</div>'
+        st.markdown(fc_html, unsafe_allow_html=True)
+
+        # ── 四宮格資訊卡 ──
+        info_items = [
+            ('💧', '濕度', f'{today_humid:.0f}%', '相對濕度'),
+            ('🌡️', '體感', f'{today_feels:.0f}°C', today_desc),
+            ('💨', '風速', f'{today_wind:.0f} km/h', get_wind_level(today_wind)),
+            ('☂️', '降雨機率', f'{today_rain}%', '今日降雨'),
+        ]
+        ig = '<div class="info-grid">'
+        for emoji, label, value, sub in info_items:
+            ig += f"""
+            <div class="info-card">
+                <div class="info-emoji">{emoji}</div>
+                <div class="info-label">{label}</div>
+                <div class="info-value">{value}</div>
+                <div class="info-sub">{sub}</div>
+            </div>"""
+        ig += '</div>'
+        st.markdown(ig, unsafe_allow_html=True)
+
+        # ── AQI 彩虹進度條 ──
+        if show_aqi and aqi_data:
+            if isinstance(aqi_data, dict) and 'AQI' in aqi_data:
+                aqi_val = aqi_data.get('AQI', 'N/A')
+                pm25 = aqi_data.get('PM2.5', 'N/A')
+                pm10 = aqi_data.get('PM10', 'N/A')
+                o3   = aqi_data.get('O3', 'N/A')
+                no2  = aqi_data.get('NO2', 'N/A')
+                try: aqi_num = int(aqi_val)
+                except: aqi_num = 0
+                detail_items = [
+                    ('PM2.5', f'{pm25} μg/m³'),
+                    ('PM10',  f'{pm10} μg/m³'),
+                    ('O₃',    f'{o3} ppb'),
+                    ('NO₂',   f'{no2} ppb'),
+                ]
+            elif isinstance(aqi_data, dict):
+                aqi_val = aqi_data.get('aqi', 'N/A')
+                iaqi    = aqi_data.get('iaqi', {}) or {}
+                pm25_v  = iaqi.get('pm25', {}).get('v', 'N/A') if isinstance(iaqi, dict) else 'N/A'
+                pm10_v  = iaqi.get('pm10', {}).get('v', 'N/A') if isinstance(iaqi, dict) else 'N/A'
+                try: aqi_num = int(aqi_val)
+                except: aqi_num = 0
+                detail_items = [
+                    ('PM2.5', f'{pm25_v} μg/m³'),
+                    ('PM10',  f'{pm10_v} μg/m³'),
+                    ('資料來源', 'WAQI'),
+                    ('AQI',   f'{aqi_val}'),
+                ]
+            else:
+                aqi_num  = 0
+                aqi_val  = 'N/A'
+                detail_items = [('AQI', 'N/A')] * 4
+
+            if isinstance(aqi_val, str) and aqi_val.isdigit():
+                aqi_val_int = int(aqi_val)
+            elif isinstance(aqi_val, (int, float)):
+                aqi_val_int = int(aqi_val)
+            else:
+                aqi_val_int = 0
+
+            aqi_bar_html = render_aqi_bar(aqi_val_int)
+
+            dg = '<div class="aqi-detail-grid">'
+            for label, val in detail_items:
+                dg += f"""
+                <div class="aqi-detail-card">
+                    <div class="ad-label">{label}</div>
+                    <div class="ad-value">{val}</div>
+                </div>"""
+            dg += '</div>'
+
+            st.markdown(aqi_bar_html + dg, unsafe_allow_html=True)
+
+        # ── 出門建議 ──
+        suggestions = []
+        if tomorrow_rain > 60:
+            suggestions.append(('danger', '☂️', f'高降雨機率 {tomorrow_rain}%，建議攜帶雨具'))
+        elif tomorrow_rain > 30:
+            suggestions.append(('warn', '🌂', f'降雨機率 {tomorrow_rain}%，建議帶傘'))
+        if avg_wind > 25:
+            suggestions.append(('warn', '💨', f'風速較強 {avg_wind} km/h（{get_wind_level(avg_wind)}），注意防風'))
+        if tomorrow_max > 32:
+            suggestions.append(('danger', '🥵', f'高溫炎熱 {tomorrow_max:.0f}°C，請注意防曬'))
+        if tomorrow_min < 18:
+            suggestions.append(('warn', '🧥', f'早晚溫差大 {tomorrow_min:.0f}°C，建議帶外套'))
+        if tomorrow_code in [95, 96, 99]:
+            suggestions.append(('danger', '⛈️', '可能有雷雨，請留意天氣變化'))
+
+        if show_aqi and aqi_data:
+            try:
+                if isinstance(aqi_data, dict) and 'AQI' in aqi_data:
+                    aqi_check = int(aqi_data.get('AQI', 0))
+                elif isinstance(aqi_data, dict):
+                    aqi_check = int(aqi_data.get('aqi', 0))
+                else:
+                    aqi_check = 0
+                if aqi_check > 150:
+                    suggestions.append(('danger', '🌫️', f'空品不佳 AQI:{aqi_check}，建議戴口罩'))
+                elif aqi_check > 100:
+                    suggestions.append(('warn', '🫁', f'空品敏感注意 AQI:{aqi_check}'))
+            except: pass
+
+        if not suggestions:
+            suggestions.append(('good', '✅', '天氣良好，出門沒問題！'))
+
+        sg = '<div class="suggestions">'
+        for level, emoji, text in suggestions:
+            sg += f'<div class="sugg-card {level}"><span class="sugg-emoji">{emoji}</span><span>{text}</span></div>'
+        sg += '</div>'
+        st.markdown(sg, unsafe_allow_html=True)
+
+        # ── 圖表區 ──
+        if show_charts:
+            hours  = min(days_to_show * 24, 48)
+            times  = hourly['time'][:hours]
+            temps  = hourly['temperature_2m'][:hours]
+            feels  = hourly['apparent_temperature'][:hours]
+            humid  = hourly['relative_humidity_2m'][:hours]
+            rain_p = hourly['precipitation_probability'][:hours]
+            wind   = hourly['wind_speed_10m'][:hours]
+
+            # 溫度圖
+            fig_temp = go.Figure()
+            fig_temp.add_trace(go.Scatter(
+                x=times, y=temps, mode='lines+markers', name='氣溫',
+                line=dict(color='#fbbf24', width=3), marker=dict(size=6, color='#fbbf24')
+            ))
+            fig_temp.add_trace(go.Scatter(
+                x=times, y=feels, mode='lines+markers', name='體感溫度',
+                line=dict(color='#f87171', width=2, dash='dash'), marker=dict(size=5, color='#f87171')
+            ))
+            fig_temp.update_layout(
+                title=dict(text='🌡️ 溫度趨勢', font=dict(color='white', size=15)),
+                xaxis=dict(title=dict(text='時間', font=dict(color='rgba(255,255,255,0.6)')),
+                           showgrid=False, color='rgba(255,255,255,0.3)'),
+                yaxis=dict(title=dict(text='°C', font=dict(color='rgba(255,255,255,0.6)')),
+                           showgrid=True, gridcolor='rgba(255,255,255,0.06)', color='rgba(255,255,255,0.3)'),
+                height=320, template='plotly_dark',
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='rgba(255,255,255,0.8)'),
+                hovermode='x unified',
+                legend=dict(font=dict(color='rgba(255,255,255,0.7)'), bgcolor='rgba(0,0,0,0)'),
+                autosize=True
+            )
+
+            # 濕度 + 降雨圖
+            fig_hr = go.Figure()
+            fig_hr.add_trace(go.Bar(
+                x=times, y=rain_p, name='降雨機率%',
+                marker_color='rgba(56,189,248,0.6)', width=1000*60*60
+            ))
+            fig_hr.add_trace(go.Scatter(
+                x=times, y=humid, mode='lines', name='濕度%',
+                line=dict(color='#a78bfa', width=2),
+                yaxis='y2'
+            ))
+            fig_hr.update_layout(
+                title=dict(text='💧 濕度與降雨機率', font=dict(color='white', size=15)),
+                xaxis=dict(showgrid=False, color='rgba(255,255,255,0.3)'),
+                yaxis=dict(title=dict(text='降雨機率 %', font=dict(color='rgba(255,255,255,0.6)')),
+                           range=[0,100], showgrid=True,
+                           gridcolor='rgba(255,255,255,0.06)', color='rgba(255,255,255,0.3)',
+                           tickfont=dict(color='rgba(255,255,255,0.6)')),
+                yaxis2=dict(title=dict(text='濕度 %', font=dict(color='rgba(255,255,255,0.6)')),
+                            overlaying='y', side='right', range=[0,100],
+                            color='rgba(255,255,255,0.3)',
+                            tickfont=dict(color='rgba(255,255,255,0.6)')),
+                height=320, template='plotly_dark',
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='rgba(255,255,255,0.8)'),
+                hovermode='x unified',
+                legend=dict(font=dict(color='rgba(255,255,255,0.7)'), bgcolor='rgba(0,0,0,0)'),
+                autosize=True
+            )
+
+            # 風速圖
+            wind_colors = ['#4ade80' if w < 20 else '#fb923c' if w < 40 else '#f87171' for w in wind]
+            fig_wind = go.Figure()
+            fig_wind.add_trace(go.Bar(
+                x=times, y=wind, name='風速 km/h',
+                marker_color=wind_colors, width=1000*60*60
+            ))
+            fig_wind.update_layout(
+                title=dict(text=f'{get_wind_emoji(avg_wind)} 風速趨勢（平均 {avg_wind} km/h）', font=dict(color='white', size=15)),
+                xaxis=dict(showgrid=False, color='rgba(255,255,255,0.3)'),
+                yaxis=dict(title=dict(text='km/h', font=dict(color='rgba(255,255,255,0.6)')),
+                           showgrid=True, gridcolor='rgba(255,255,255,0.06)',
+                           color='rgba(255,255,255,0.3)',
+                           tickfont=dict(color='rgba(255,255,255,0.6)')),
+                height=300, template='plotly_dark',
+                paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+                font=dict(color='rgba(255,255,255,0.8)'),
+                hovermode='x unified',
+                legend=dict(font=dict(color='rgba(255,255,255,0.7)'), bgcolor='rgba(0,0,0,0)'),
+                autosize=True
+            )
+
+            col_chart1, col_chart2 = st.columns(2)
+            with col_chart1:
+                st.plotly_chart(fig_temp, use_container_width=True)
+            with col_chart2:
+                st.plotly_chart(fig_hr, use_container_width=True)
+            st.plotly_chart(fig_wind, use_container_width=True)
+
+        # ── 詳細資料折疊 ──
+        with st.expander("📋 詳細天氣資料（明日 + 後天）"):
+            c1, c2 = st.columns(2)
+            with c1:
+                st.markdown("##### 明天")
+                st.write(f"- 天氣：{tomorrow_icon} {tomorrow_desc}")
+                st.write(f"- 溫度：{tomorrow_min:.0f}°C ~ {tomorrow_max:.0f}°C")
+                st.write(f"- 降雨機率：{tomorrow_rain}%")
+                st.write(f"- 風速：{avg_wind} km/h（{get_wind_level(avg_wind)}）")
+            with c2:
+                if day3_max:
+                    st.markdown("##### 後天")
+                    st.write(f"- 天氣：{day3_icon} {day3_desc}")
+                    st.write(f"- 溫度：{day3_min:.0f}°C ~ {day3_max:.0f}°C")
+                    st.write(f"- 降雨機率：{day3_rain}%")
+
+    else:
+        st.error("無法取得天氣資料，請稍後再試 😔")
+
+    # ── Footer ──
+    st.markdown(f"""
+    <div class="footer">
+        📊 資料更新：{now_str} &nbsp;|&nbsp; V{VERSION}<br>
+        本報告僅供參考
+    </div>
+    """, unsafe_allow_html=True)
+
+
+if __name__ == "__main__":
+    main()
