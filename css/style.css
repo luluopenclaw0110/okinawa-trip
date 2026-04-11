@@ -684,6 +684,26 @@ img {
   flex: 1;
 }
 
+/* ===== Rest Card Link ===== */
+.rest-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.rest-card-cta {
+  display: inline-block;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--primary);
+  transition: color 0.2s;
+}
+
+.rest-card-link:hover .rest-card-cta {
+  color: var(--accent);
+}
+
 /* ===== Back Button ===== */
 .back-btn {
   display: inline-flex;
