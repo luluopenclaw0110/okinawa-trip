@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>景點推薦 — 南海樂園・沖繩</title>
+  <meta name="description" content="精選沖繩10大必訪景點：從美ら海水族館到首里城，從古宇利島到玉泉洞，完整介紹每一個讓人流連忘返的沖繩風景。">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar scrolled">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <span class="wave-icon">🌊</span>
+      <span class="nav-logo-text">南海樂園・沖繩</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html">首頁</a></li>
+      <li><a href="spots.html" class="active">景點</a></li>
+      <li><a href="restaurants.html">美食</a></li>
+      <li><a href="index.html#features" class="nav-cta">開始規劃</a></li>
+    </ul>
+    <button class="menu-toggle" aria-label="選單">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu">
+  <a href="index.html">首頁</a>
+  <a href="spots.html">景點推薦</a>
+  <a href="restaurants.html">美食地圖</a>
+  <a href="index.html#features">行程規劃</a>
+</div>
+
+<!-- PAGE HEADER -->
+<header class="page-header">
+  <div class="container">
+    <h1>景點推薦</h1>
+    <p>精選 10 個沖繩最值得走訪的美麗角落</p>
+  </div>
+</header>
+
+<!-- FILTER TABS -->
+<div class="section-sm" style="background:var(--white);border-bottom:1px solid var(--gray-200)">
+  <div class="container">
+    <div class="filter-tabs">
+      <button class="filter-tab active" data-cat="all">全部景點</button>
+      <button class="filter-tab" data-cat="north">北部</button>
+      <button class="filter-tab" data-cat="center">中部</button>
+      <button class="filter-tab" data-cat="south">南部</button>
+      <button class="filter-tab" data-cat="heritage">世界遺產</button>
+      <button class="filter-tab" data-cat="nature">自然</button>
+      <button class="filter-tab" data-cat="culture">人文</button>
+    </div>
+  </div>
+</div>
+
+<!-- SPOTS GRID -->
+<section class="section">
+  <div class="container">
+    <div class="card-grid">
+
+      <!-- 01 -->
+      <a href="spots/spot-01.html" class="card filter-card fade-in" data-cat="north nature">
+        <div class="card-img-wrap">
+          <img src="../images/spots/spot_01.jpg" alt="美ら海水族館" loading="lazy">
+          <span class="card-badge">必訪</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">北部｜水產</div>
+          <h3 class="card-title">美ら海水族館</h3>
+          <p class="card-text">走進黑潮的奇幻國度，世界最大級「黑潮之海」巨型水槽，鯨鯊緩緩游過的龐然身影令人屏息。</p>
+          <div class="card-footer">
+            <span class="card-meta">📍 本部町</span>
+            <div class="card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+
+      <!-- 02 -->
+      <a href="spots/spot-02.html" class="card filter-card fade-in" data-cat="south heritage culture">
+        <div class="card-img-wrap">
+          <img src="../images/spots/spot_02.jpg" alt="首里城公園" loading="lazy">
+          <span class="card-badge">世界遺產</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">那霸｜歷史</div>
+          <h3 class="card-title">首里城公園</h3>
+          <p class="card-text">琉球王國的政治心臟，朱紅城門與木造結構散發融合中國、日本與琉球的獨特魅力。</p>
+          <div class="card-footer">
+            <span class="card-meta">📍 那霸市</span>
+            <div class="card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+
+      <!-- 03 -->
+      <a href="spots/spot-03.html" class="card filter-card fade-in" data-cat="center nature">
+        <div class="card-img-wrap">
+          <img src="../images/spots/spot_03.jpg" alt="萬座毛" loading="lazy">
+          <span class="card-badge">自然</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">中部｜海岸</div>
+          <h3 class="card-title">萬座毛</h3>
+          <p class="card-text">象鼻崖畔的絕美暮色，海天一色的遼闘藍，金橙色的夕陽將整片海域染成琥珀與珊瑚橘。</p>
+          <div class="card-footer">
+            <span class="card-meta">📍 恩納村</span>
+            <div class="card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+
+      <!-- 04 -->
+      <a href="spots/spot-04.html" class="card filter-card fade-in" data-cat="north nature">
+        <div class="card-img-wrap">
+          <img src="../images/spots/spot_04.jpg" alt="古宇利島" loading="lazy">
+          <span class="card-badge">戀人之島</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">北部｜海灘</div>
+          <h3 class="card-title">古宇利島</h3>
+          <p class="card-text">穿越2550公尺跨海大橋，澄澈透明的海灘與心型岩石，是網美與情侶的朝聖地。</p>
+          <div class="card-footer">
+            <span class="card-meta">📍 古宇利島</span>
+            <div class="card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+
+      <!-- 05 -->
+      <a href="spots/spot-05.html" class="card filter-card fade-in" data-cat="north heritage culture">
+        <div class="card-img-wrap">
+          <img src="../images/spots/spot_05.jpg" alt="今歸仁城跡" loading="lazy">
+          <span class="card-badge">賞櫻</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">北部｜城跡</div>
+          <h3 class="card-title">今歸仁城跡</h3>
+          <p class="card-text">北方王城的櫻粉浪漫，1月下旬至2月寒緋櫻花季，粉紅花瓣層層覆蓋古城石牆。</p>
+          <div class="card-footer">
+            <span class="card-meta">📍 今歸仁村</span>
+            <div class="card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+
+      <!-- 06 -->
+      <a href="spots/spot-06.html" class="card filter-card fade-in" data-cat="center heritage">
+        <div class="card-img-wrap">
+          <img src="../images/spots/spot_06.jpg" alt="勝連城跡" loading="lazy">
+          <span class="card-badge">世界遺產</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">中部｜城跡</div>
+          <h3 class="card-title">勝連城跡</h3>
+          <p class="card-text">女性之城的優雅弧線，洋溢自然流暢美感，2000年與首里城等共同列入世界文化遺產。</p>
+          <div class="card-footer">
+            <span class="card-meta">📍 勝連町</span>
+            <div class="card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+
+      <!-- 07 -->
+      <a href="spots/spot-07.html" class="card filter-card fade-in" data-cat="south nature culture">
+        <div class="card-img-wrap">
+          <img src="../images/spots/spot_07.jpg" alt="玉泉洞王國" loading="lazy">
+          <span class="card-badge">鐘乳洞</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">南部｜自然</div>
+          <h3 class="card-title">玉泉洞王國</h3>
+          <p class="card-text">踏入時光遺忘的地下宮殿，近一百萬根鐘乳石筍佇立，是百萬年歲月的藝術品。</p>
+          <div class="card-footer">
+            <span class="card-meta">📍 南城市</span>
+            <div class="card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+
+      <!-- 08 -->
+      <a href="spots/spot-08.html" class="card filter-card fade-in" data-cat="south heritage culture">
+        <div class="card-img-wrap">
+          <img src="../images/spots/spot_08.jpg" alt="齋場御嶽" loading="lazy">
+          <span class="card-badge">世界遺產</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">南部｜聖地</div>
+          <h3 class="card-title">齋場御嶽</h3>
+          <p class="card-text">琉球王國最高級的聖地，UNESCO世界文化遺產，神聖三庫里與蔚藍大海交織的夢幻畫面。</p>
+          <div class="card-footer">
+            <span class="card-meta">📍 南城市</span>
+            <div class="card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+
+      <!-- 09 -->
+      <a href="spots/spot-09.html" class="card filter-card fade-in" data-cat="center culture">
+        <div class="card-img-wrap">
+          <img src="../images/spots/spot_09.jpg" alt="港川外人住宅" loading="lazy">
+          <span class="card-badge">異國風</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">中部｜街區</div>
+          <h3 class="card-title">港川外人住宅</h3>
+          <p class="card-text">時光凝結的美式風情，紅瓦白牆特色商店街，超人氣ippeichoco可麗露與網美咖啡廳。</p>
+          <div class="card-footer">
+            <span class="card-meta">📍 浦添市</span>
+            <div class="card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+
+      <!-- 10 -->
+      <a href="spots/spot-10.html" class="card filter-card fade-in" data-cat="center nature">
+        <div class="card-img-wrap">
+          <img src="../images/spots/spot_10.jpg" alt="殘波岬公園" loading="lazy">
+          <span class="card-badge">夕陽</span>
+        </div>
+        <div class="card-body">
+          <div class="card-tag">中部｜海岸</div>
+          <h3 class="card-title">殘波岬公園</h3>
+          <p class="card-text">白色燈塔與珊瑚礁岩的夕陽約定，30公尺高懸崖峭壁上的壯闘海景，令人難以忘懷。</p>
+          <div class="card-footer">
+            <span class="card-meta">📍 讀谷村</span>
+            <div class="card-arrow">→</div>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+  <div class="container">
+    <h2 class="cta-title fade-in">看完景點，餓了嗎？</h2>
+    <p class="cta-sub fade-in">探索超人氣餐廳與海景咖啡廳</p>
+    <div class="fade-in">
+      <a href="restaurants.html" class="btn btn-white">前往美食頁面 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <h3>🌊 南海樂園・沖繩</h3>
+        <p>精選沖繩10大必訪景點與超人氣美食，為您揭開這座南海樂園最動人的風景。</p>
+      </div>
+      <div class="footer-col">
+        <h4>快速連結</h4>
+        <ul>
+          <li><a href="index.html">首頁</a></li>
+          <li><a href="spots.html">景點推薦</a></li>
+          <li><a href="restaurants.html">美食地圖</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>北部推薦</h4>
+        <ul>
+          <li><a href="spots/spot-01.html">美ら海水族館</a></li>
+          <li><a href="spots/spot-04.html">古宇利島</a></li>
+          <li><a href="spots/spot-05.html">今歸仁城跡</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>中部推薦</h4>
+        <ul>
+          <li><a href="spots/spot-03.html">萬座毛</a></li>
+          <li><a href="spots/spot-07.html">玉泉洞王國</a></li>
+          <li><a href="restaurants.html#banta">Banta Cafe</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 南海樂園・沖繩. All rights reserved.</span>
+      <span>南海樂園・沖繩 — 探索最美的藍</span>
+    </div>
+  </div>
+</footer>
+
+<button class="back-top" aria-label="回到頂部">↑</button>
+<script src="js/main.js"></script>
+</body>
+</html>
