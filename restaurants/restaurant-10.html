@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banta Cafe｜南海樂園・沖繩</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    .rest-hero { position: relative; height: 70vh; min-height: 480px; overflow: hidden; }
+    .rest-hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .rest-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,40,80,0.25) 0%, rgba(0,40,80,0.65) 100%); }
+    .rest-hero-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 3rem 2rem 2.5rem; color: #fff; }
+    .rest-hero-tag { display: inline-block; background: #FF6B35; color: #fff; font-size: 0.8rem; font-weight: 700; padding: 0.3rem 0.9rem; border-radius: 2rem; margin-bottom: 0.8rem; letter-spacing: 0.05em; }
+    .rest-hero h1 { font-family: 'Noto Serif JP', serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 700; margin: 0 0 0.5rem; text-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+    .rest-hero p { font-family: 'Noto Sans JP', sans-serif; font-size: 1rem; opacity: 0.9; margin: 0; }
+    .breadcrumb { background: #f8f9fa; border-bottom: 1px solid #e9ecef; }
+    .breadcrumb ul { list-style: none; margin: 0; padding: 0.8rem 0; display: flex; gap: 0.5rem; align-items: center; font-size: 0.875rem; color: #6c757d; }
+    .breadcrumb a { color: #0077B6; text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .breadcrumb-sep { color: #adb5bd; }
+    .rest-article { max-width: 820px; margin: 0 auto; padding: 3rem 1.5rem; }
+    .rest-intro { font-family: 'Noto Sans JP', sans-serif; font-size: 1.1rem; line-height: 1.9; color: #333; margin-bottom: 2.5rem; border-left: 4px solid #0077B6; padding-left: 1.5rem; }
+    .info-card { background: linear-gradient(135deg, #0077B6 0%, #005f92 100%); border-radius: 1.25rem; padding: 2rem; color: #fff; margin-bottom: 2.5rem; box-shadow: 0 8px 32px rgba(0,119,182,0.25); }
+    .info-card h2 { font-family: 'Noto Serif JP', serif; font-size: 1.3rem; margin: 0 0 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.3); padding-bottom: 0.75rem; }
+    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.2rem; }
+    .info-label { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 0.3rem; }
+    .info-value { font-family: 'Noto Sans JP', sans-serif; font-size: 0.95rem; font-weight: 500; }
+    .rest-nav { display: flex; justify-content: space-between; gap: 1rem; padding-top: 2rem; border-top: 1px solid #e9ecef; }
+    .rest-nav a { display: flex; align-items: center; gap: 0.5rem; color: #0077B6; text-decoration: none; font-family: 'Noto Sans JP', sans-serif; font-size: 0.9rem; font-weight: 500; padding: 0.7rem 1.2rem; border: 1.5px solid #0077B6; border-radius: 0.75rem; transition: background 0.2s, color 0.2s; min-width: 120px; }
+    .rest-nav a:hover { background: #0077B6; color: #fff; }
+    .rest-nav .nav-prev { flex-direction: row-reverse; text-align: right; }
+    @media (max-width: 600px) { .rest-hero { height: 50vh; } .info-grid { grid-template-columns: 1fr 1fr; } .rest-nav { flex-direction: column; } .rest-nav .nav-next { margin-left: 0; } }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="container">
+    <a href="../index.html" class="nav-logo">🌊 <span>南海樂園</span>・沖繩</a>
+    <ul class="nav-links">
+      <li><a href="../index.html">首頁</a></li>
+      <li><a href="../spots.html">景點推薦</a></li>
+      <li><a href="../restaurants.html" class="active">美食餐廳</a></li>
+    </ul>
+    <div class="hamburger" aria-label="選單"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <div class="mobile-menu-panel">
+    <button class="menu-close" aria-label="關閉">✕</button>
+    <ul>
+      <li><a href="../index.html">首頁</a></li>
+      <li><a href="../spots.html">景點推薦</a></li>
+      <li><a href="../restaurants.html">美食餐廳</a></li>
+    </ul>
+  </div>
+</div>
+
+<div class="rest-hero">
+  <img src="../images/foods/food_07.jpg" alt="Banta Cafe">
+  <div class="rest-hero-overlay"></div>
+  <div class="rest-hero-content">
+    <span class="rest-hero-tag">☕ 海景咖啡</span>
+    <h1>Banta Cafe</h1>
+    <p>讀谷村｜日本最大规模海景咖啡厅，悬崖上的浪漫夕陽</p>
+  </div>
+</div>
+
+<div class="breadcrumb">
+  <div class="container">
+    <ul>
+      <li><a href="../index.html">首頁</a></li>
+      <li class="breadcrumb-sep">›</li>
+      <li><a href="../restaurants.html">美食餐廳</a></li>
+      <li class="breadcrumb-sep">›</li>
+      <li>Banta Cafe</li>
+    </ul>
+  </div>
+</div>
+
+<main class="rest-article">
+  <p class="rest-intro">
+    位於讀谷村懸崖上的「Banta Cafe」，是日本最大規模的海景咖啡廳之一，由星野度假村旗下營運。分為四個特色主題區——Panorama Deck、Seaside Terrace、Rocky Terrace、Gorogoro Lounge——每區各有獨特的景觀與氛圍。
+  </p>
+  <p class="rest-intro" style="border-left-color: #FF6B35;">
+    夕陽時段可欣賞金橙色光線將海平線染成琥珀色的壯觀場面，浪漫指數破表。備有77格免費停車場，從那霸機場開車約60分鐘可抵達。無時間限制用餐，但假日時段人潮眾多，建議平日前往或提前預約。
+  </p>
+
+  <div class="info-card">
+    <h2>📋 基本資訊</h2>
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">地址</div>
+        <div class="info-value">沖繩縣中頭郡讀谷村儀間560</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">營業時間</div>
+        <div class="info-value">平日 10:00～日沒／土・日祝 8:00～日沒</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">人均消費</div>
+        <div class="info-value">約 ¥1,500～4,000</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">推薦菜單</div>
+        <div class="info-value">海景下午茶、Olu Grill 木柴燒烤牛排、海鮮料理</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="rest-nav">
+    <a href="restaurant-09.html" class="nav-prev">← 上一頁<br><small>風林火山</small></a>
+    <a href="#" class="nav-empty nav-next">下一頁 →</a>
+  </nav>
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <h3>🌊 <span>南海樂園</span>・沖繩</h3>
+        <p>探索琉球王國的藍色奇幻，展開一生必訪的南方旅程。</p>
+      </div>
+      <div class="footer-links">
+        <h4>快速連結</h4>
+        <ul>
+          <li><a href="../spots.html">景點推薦</a></li>
+          <li><a href="../restaurants.html">美食餐廳</a></li>
+        </ul>
+      </div>
+      <div class="footer-links">
+        <h4>資源</h4>
+        <ul>
+          <li><a href="#">旅遊攻略</a></li>
+          <li><a href="#">交通指南</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 南海樂園・沖繩｜文字編輯：文字編輯高手</p>
+    </div>
+  </div>
+</footer>
+<script src="../js/main.js"></script>
+</body>
+</html>
