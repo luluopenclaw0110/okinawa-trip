@@ -318,4 +318,47 @@ This is a starting point. Add your own conventions, style, and rules as you figu
 Phase 1-1 完成 → 等 10 秒 → Phase 1-2 自動派工
 Phase 1-2 完成 → 等 10 秒 → Phase 2-1 自動派工
 （以此類推，直到 Phase 7-1 少爺確認）
+
+---
+
+## 📊 專案管理標準流程（PM + 多階段任務）
+
+### 收到大型專案時的標準流程
+
+1. **Step 1: PM 分析**
+   - 派遣 PM 分析可行性和執行計畫
+   - PM 必須回答：可行性、所需分身/技能、執行 Phase、資源需求
+   - **結果寫入**：`/tmp/subagent-results/pm-[專案名]-planning.json`
+
+2. **Step 2: 少爺確認方向**
+   - 等少爺回覆確認後才繼續
+   - 不確定的問題要先問清楚
+
+3. **Step 3: 建立 progress.log**
+   - 檔案：`~/.openclaw/workspace/progress.log`
+   - 格式：Phase | 內容 | 狀態 | 負責分身
+
+4. **Step 4: 依序執行每個 Phase**
+   - 每個 Phase 完成後，**立刻派下一個 Phase**（不等少爺提醒）
+   - 每個 Phase 的分身結果寫入：`/tmp/subagent-results/[分身]-[Phase].json`
+
+5. **Step 5: 完成後稟報少爺**
+   - 每個 Phase 完成都要主動回報
+   - 全部完成後做最終稟報
+
+### 教訓（少爺提醒的）
+
+> 「不是有把這流程寫入 AGENTS.md？」
+> → **有的流程就要寫下來，未來才不會忘！**
+
+### 股票分析專案範例（2026-04-15 執行）
+
+| Phase | 任務 | 分身 | 產出 |
+|-------|------|------|------|
+| PM規劃 | 分析可行性 | pm | pm-stock-analysis-planning.json |
+| Phase 1-1 | 取得前40大個股清單 | stockhelper | top40_stocks.csv |
+| Phase 1-2 | 爬取基本資料和財務數據 | stockhelper | top40_financial.csv |
+| Phase 2 | 數據分析 | analyst | 分析報告 |
+| Phase 3 | 報告撰寫 | editor | 文字內容 |
+| Phase 4 | PPT製作 | 待定 | PPT檔案 |
 ```
